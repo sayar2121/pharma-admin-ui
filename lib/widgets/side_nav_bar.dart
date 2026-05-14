@@ -50,7 +50,7 @@ class SideNavBar extends StatelessWidget {
                     child: Divider(color: AppColors.divider, thickness: 1),
                   ),
                   _buildNavItem(context, 5, 'Profile', Iconsax.user, '/profile'),
-                  _buildNavItem(context, 6, 'Settings', Iconsax.setting_2, '/dashboard'),
+                  _buildNavItem(context, 6, 'Settings', Iconsax.setting_2, '/settings'),
                 ],
               ),
             ),

@@ -9,6 +9,8 @@ import '../screens/available_medicine/available_medicine_screen.dart';
 import '../screens/medicine_inventory/add_to_inventory_screen.dart';
 import '../screens/medicine_inventory/medicine_inventory_screen.dart';
 import '../screens/medicine_inventory/medicine_details_screen.dart';
+import '../screens/settings/settings_screen.dart';
+import '../screens/about_us/about_us_screen.dart';
 import '../models/available_medicine.dart';
 import '../models/medicine_inventory.dart';
 
@@ -60,6 +62,14 @@ final GoRouter appRouter = GoRouter(
         final item = state.extra as MedicineInventory;
         return MedicineDetailsScreen(inventoryItem: item);
       },
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/about-us',
+      builder: (context, state) => const AboutUsScreen(),
     ),
   ],
 );

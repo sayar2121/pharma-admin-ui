@@ -53,7 +53,7 @@ class ProfileOptionsCard extends StatelessWidget {
                 title: 'Settings',
                 subtitle: 'Privacy and preferences',
                 color: AppColors.silver,
-                onTap: () {},
+                onTap: () => context.push('/settings'),
                 isLast: true,
               ),
             ],

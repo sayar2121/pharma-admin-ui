@@ -17,7 +17,18 @@ class ApiUrl {
 
   // Inventory Endpoints
   static const String addToInventory = "$baseUrl/medicine-inventory/create";
-  static const String getInventoryByShop = "$baseUrl/medicine-inventory/get-all-by-shop"; // Append shopId
-  static const String updateInventory = "$baseUrl/medicine-inventory/update-by"; // Append inventoryId
-  static const String deleteInventory = "$baseUrl/medicine-inventory/delete-by"; // Append inventoryId
+  static const String getInventoryByShop =
+      "$baseUrl/medicine-inventory/get-all-by-shop"; // Append shopId
+  static const String updateInventory =
+      "$baseUrl/medicine-inventory/update-by"; // Append inventoryId
+  static const String deleteInventory =
+      "$baseUrl/medicine-inventory/delete-by"; // Append inventoryId
+
+  // About Us Endpoints
+  static const String aboutUs = "$baseUrl/about-us";
+  static const String getAboutUsAll = "$aboutUs/get-all";
+  static String getAboutUsById(int id) => "$aboutUs/get-by/$id";
+
+  // Helper for image URLs
+  static String imageUrl(String path) => "$baseUrl/$path";
 }
