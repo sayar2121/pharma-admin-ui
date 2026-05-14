@@ -42,7 +42,7 @@ class SideNavBar extends StatelessWidget {
                 children: [
                   _buildNavItem(context, 0, 'Dashboard', Iconsax.element_3, '/dashboard'),
                   _buildNavItem(context, 1, 'Available Medicines', Iconsax.health, '/available-medicines'),
-                  _buildNavItem(context, 2, 'My Inventory', Iconsax.box, '/dashboard'),
+                  _buildNavItem(context, 2, 'My Inventory', Iconsax.box, '/medicine-inventory'),
                   _buildNavItem(context, 3, 'Order Management', Iconsax.receipt, '/dashboard'),
                   _buildNavItem(context, 4, 'Payments & Earnings', Iconsax.wallet, '/dashboard'),
                   const Padding(

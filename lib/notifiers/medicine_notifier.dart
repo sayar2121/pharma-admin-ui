@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/available_medicine.dart';
+import '../models/medicine_inventory.dart';
 import '../services/medicine_services.dart';
 
 class MedicineState {
@@ -9,6 +10,8 @@ class MedicineState {
   final bool hasMore;
   final int page;
   final String? error;
+  final List<MedicineInventory> inventory;
+  final List<MedicineInventory> filteredInventory;
   final String? currentSearchQuery;
   final String? currentCategoryFilter;
 
@@ -21,6 +24,8 @@ class MedicineState {
     this.error,
     this.currentSearchQuery,
     this.currentCategoryFilter,
+    this.inventory = const [],
+    this.filteredInventory = const [],
   });
 
   MedicineState copyWith({
@@ -32,6 +37,8 @@ class MedicineState {
     String? error,
     String? currentSearchQuery,
     String? currentCategoryFilter,
+    List<MedicineInventory>? inventory,
+    List<MedicineInventory>? filteredInventory,
   }) {
     return MedicineState(
       medicines: medicines ?? this.medicines,
@@ -42,6 +49,8 @@ class MedicineState {
       error: error ?? this.error,
       currentSearchQuery: currentSearchQuery ?? this.currentSearchQuery,
       currentCategoryFilter: currentCategoryFilter ?? this.currentCategoryFilter,
+      inventory: inventory ?? this.inventory,
+      filteredInventory: filteredInventory ?? this.filteredInventory,
     );
   }
 }
@@ -102,6 +111,91 @@ class MedicineNotifier extends StateNotifier<MedicineState> {
       );
     } catch (e) {
       state = state.copyWith(isFetchingMore: false, error: e.toString());
+    }
+  }
+
+  // Inventory Methods
+  Future<void> fetchInventory(String shopId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final inventory = await _medicineService.getShopInventory(shopId);
+      state = state.copyWith(
+        inventory: inventory,
+        filteredInventory: inventory,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  void searchInventory(String query) {
+    if (query.isEmpty) {
+      state = state.copyWith(filteredInventory: state.inventory);
+    } else {
+      final filtered = state.inventory.where((item) {
+        final name = item.medicine?.medicineName.toLowerCase() ?? '';
+        return name.contains(query.toLowerCase());
+      }).toList();
+      state = state.copyWith(filteredInventory: filtered);
+    }
+  }
+
+  Future<void> addToInventory({
+    required String shopId,
+    required String medicineId,
+    required double discountPercent,
+    required String status,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _medicineService.addToInventory(
+        shopId: shopId,
+        medicineId: medicineId,
+        discountPercent: discountPercent,
+        status: status,
+      );
+      // Refresh inventory
+      await fetchInventory(shopId);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> updateInventoryItem({
+    required String shopId,
+    required String inventoryId,
+    double? discountPercent,
+    String? status,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _medicineService.updateInventoryItem(
+        inventoryId: inventoryId,
+        discountPercent: discountPercent,
+        status: status,
+      );
+      // Refresh inventory
+      await fetchInventory(shopId);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> deleteInventoryItem({
+    required String shopId,
+    required String inventoryId,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _medicineService.deleteInventoryItem(inventoryId);
+      // Refresh inventory
+      await fetchInventory(shopId);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
     }
   }
 }

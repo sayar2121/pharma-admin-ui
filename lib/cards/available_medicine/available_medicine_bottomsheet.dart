@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/available_medicine.dart';
 import '../../services/api_url.dart';
 import '../../theme/app_theme.dart';
@@ -184,7 +185,7 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                 ),
                 child: ElevatedButton(
                   onPressed: () {
-                    // Logic to add to inventory
+                    context.push('/add-to-inventory', extra: medicine);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,

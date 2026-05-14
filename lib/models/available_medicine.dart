@@ -1,5 +1,5 @@
 class AvailableMedicine {
-  final String? id;
+  final String? medicineId;
   final String medicineName;
   final String medicineCategory;
   final String? medicinePhoto;
@@ -10,7 +10,7 @@ class AvailableMedicine {
   final double mrp;
 
   AvailableMedicine({
-    this.id,
+    this.medicineId,
     required this.medicineName,
     required this.medicineCategory,
     this.medicinePhoto,
@@ -23,14 +23,13 @@ class AvailableMedicine {
 
   factory AvailableMedicine.fromJson(Map<String, dynamic> json) {
     return AvailableMedicine(
-      id: json['id']?.toString(), // Assuming the backend returns an 'id'
+      medicineId: (json['medicine_id'] ?? json['id'])?.toString(),
       medicineName: json['medicine_name'] ?? '',
       medicineCategory: json['medicine_category'] ?? '',
       medicinePhoto: json['medicine_photo'],
       medicineQuantity: json['medicine_quantity'] ?? '',
       medicineDescription: json['medicine_description'],
       medicineComposition: json['medicine_composition'],
-      // precautions can be JSON list
       precautions: json['precautions'] != null 
           ? List<String>.from(json['precautions'].map((x) => x.toString())) 
           : null,
@@ -40,7 +39,7 @@ class AvailableMedicine {
 
   Map<String, dynamic> toJson() {
     return {
-      if (id != null) 'id': id,
+      if (medicineId != null) 'medicine_id': medicineId,
       'medicine_name': medicineName,
       'medicine_category': medicineCategory,
       'medicine_photo': medicinePhoto,

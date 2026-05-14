@@ -14,4 +14,10 @@ class ApiUrl {
 
   // Medicine Endpoints
   static const String getAllMedicines = "$baseUrl/medicines/get-all";
+
+  // Inventory Endpoints
+  static const String addToInventory = "$baseUrl/medicine-inventory/create";
+  static const String getInventoryByShop = "$baseUrl/medicine-inventory/get-all-by-shop"; // Append shopId
+  static const String updateInventory = "$baseUrl/medicine-inventory/update-by"; // Append inventoryId
+  static const String deleteInventory = "$baseUrl/medicine-inventory/delete-by"; // Append inventoryId
 }
