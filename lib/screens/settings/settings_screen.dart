@@ -42,12 +42,12 @@ class SettingsScreen extends ConsumerWidget {
                   SettingsCard(
                     title: 'Terms and Conditions',
                     icon: Iconsax.document_text,
-                    onTap: () {},
+                    onTap: () => context.push('/terms-conditions'),
                   ),
                   SettingsCard(
                     title: 'Privacy and Policies',
                     icon: Iconsax.shield_tick,
-                    onTap: () {},
+                    onTap: () => context.push('/privacy-policy'),
                   ),
                   const SizedBox(height: 24),
                   _buildSectionTitle('Support'),

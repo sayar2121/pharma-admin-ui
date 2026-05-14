@@ -11,6 +11,8 @@ import '../screens/medicine_inventory/medicine_inventory_screen.dart';
 import '../screens/medicine_inventory/medicine_details_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/about_us/about_us_screen.dart';
+import '../screens/settings/terms_conditions_screen.dart';
+import '../screens/settings/privacy_policy_screen.dart';
 import '../models/available_medicine.dart';
 import '../models/medicine_inventory.dart';
 
@@ -70,6 +72,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/about-us',
       builder: (context, state) => const AboutUsScreen(),
+    ),
+    GoRoute(
+      path: '/terms-conditions',
+      builder: (context, state) => const TermsConditionsScreen(),
+    ),
+    GoRoute(
+      path: '/privacy-policy',
+      builder: (context, state) => const PrivacyPolicyScreen(),
     ),
   ],
 );

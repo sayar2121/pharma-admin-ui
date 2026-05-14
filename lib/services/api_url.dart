@@ -31,4 +31,12 @@ class ApiUrl {
 
   // Helper for image URLs
   static String imageUrl(String path) => "$baseUrl/$path";
+
+  // Terms and Conditions Endpoints
+  static const String termsConditions = "$baseUrl/terms-conditions";
+  static const String getTermsConditionsAll = "$termsConditions/get-all";
+
+  // Privacy Policy Endpoints
+  static const String privacyPolicies = "$baseUrl/privacy-policies";
+  static const String getPrivacyPoliciesAll = "$privacyPolicies/get-all";
 }
