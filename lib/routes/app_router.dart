@@ -5,6 +5,7 @@ import '../screens/auth/signup_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/profile/update_profile_screen.dart';
+import '../screens/available_medicine/available_medicine_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -32,6 +33,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/update-profile',
       builder: (context, state) => const UpdateProfileScreen(),
+    ),
+    GoRoute(
+      path: '/available-medicines',
+      builder: (context, state) => const AvailableMedicineScreen(),
     ),
   ],
 );

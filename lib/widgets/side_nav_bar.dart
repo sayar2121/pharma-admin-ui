@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import '../theme/app_theme.dart';
 
@@ -39,17 +40,17 @@ class SideNavBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  _buildNavItem(0, 'Dashboard', Iconsax.element_3),
-                  _buildNavItem(1, 'Available Medicines', Iconsax.health),
-                  _buildNavItem(2, 'My Inventory', Iconsax.box),
-                  _buildNavItem(3, 'Order Management', Iconsax.receipt),
-                  _buildNavItem(4, 'Payments & Earnings', Iconsax.wallet),
+                  _buildNavItem(context, 0, 'Dashboard', Iconsax.element_3, '/dashboard'),
+                  _buildNavItem(context, 1, 'Available Medicines', Iconsax.health, '/available-medicines'),
+                  _buildNavItem(context, 2, 'My Inventory', Iconsax.box, '/dashboard'),
+                  _buildNavItem(context, 3, 'Order Management', Iconsax.receipt, '/dashboard'),
+                  _buildNavItem(context, 4, 'Payments & Earnings', Iconsax.wallet, '/dashboard'),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                     child: Divider(color: AppColors.divider, thickness: 1),
                   ),
-                  _buildNavItem(5, 'Profile', Iconsax.user),
-                  _buildNavItem(6, 'Settings', Iconsax.setting_2),
+                  _buildNavItem(context, 5, 'Profile', Iconsax.user, '/profile'),
+                  _buildNavItem(context, 6, 'Settings', Iconsax.setting_2, '/dashboard'),
                 ],
               ),
             ),
@@ -114,13 +115,17 @@ class SideNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(int index, String title, IconData icon) {
+  Widget _buildNavItem(BuildContext context, int index, String title, IconData icon, String route) {
     final isSelected = selectedIndex == index;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
-        onTap: () => onItemSelected(index),
+        onTap: () {
+          onItemSelected(index);
+          Scaffold.of(context).closeDrawer();
+          context.go(route);
+        },
         borderRadius: BorderRadius.circular(16),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),

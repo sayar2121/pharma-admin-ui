@@ -11,4 +11,7 @@ class ApiUrl {
       "$baseUrl/auth/pharma-shop/update-by"; // Append shopId
   static const String deleteShopById =
       "$baseUrl/auth/pharma-shop/delete-by"; // Append shopId
+
+  // Medicine Endpoints
+  static const String getAllMedicines = "$baseUrl/medicines/get-all";
 }
