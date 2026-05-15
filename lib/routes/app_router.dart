@@ -11,26 +11,17 @@ import '../screens/medicine_inventory/medicine_inventory_screen.dart';
 import '../screens/medicine_inventory/medicine_details_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/about_us/about_us_screen.dart';
-import '../screens/settings/terms_conditions_screen.dart';
-import '../screens/settings/privacy_policy_screen.dart';
+import '../screens/privacy_policy/privacy_policy_screen.dart';
 import '../models/available_medicine.dart';
 import '../models/medicine_inventory.dart';
+import '../screens/terms_conditions/terms_conditions_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/signup',
-      builder: (context, state) => const SignupScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
     GoRoute(
       path: '/dashboard',
       builder: (context, state) => const DashboardScreen(),
