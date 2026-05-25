@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/user.dart';
 import '../services/auth_services.dart';
+import 'package:dio/dio.dart';
 
 class AuthState {
   final User? user;
@@ -36,6 +37,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(user: user, isLoading: false);
       }
     } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey('detail')) {
+          state = state.copyWith(isLoading: false, error: data['detail'].toString());
+          return;
+        }
+      }
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -48,6 +56,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = state.copyWith(isLoading: false);
       }
     } catch (e) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map && data.containsKey('detail')) {
+          state = state.copyWith(isLoading: false, error: data['detail'].toString());
+          return;
+        }
+      }
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }

@@ -6,6 +6,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../cards/auth/contact_bottomsheet.dart';
+import '../../cards/auth/error_card.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -41,12 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         context.go('/profile');
       }
       if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error!),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        ErrorBottomSheet.show(context, next.error!);
       }
     });
 
