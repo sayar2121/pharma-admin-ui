@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import '../theme/app_theme.dart';
 
-class SideNavBar extends StatelessWidget {
+class SideNavBar extends StatefulWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
@@ -12,6 +12,13 @@ class SideNavBar extends StatelessWidget {
     required this.selectedIndex,
     required this.onItemSelected,
   });
+
+  @override
+  State<SideNavBar> createState() => _SideNavBarState();
+}
+
+class _SideNavBarState extends State<SideNavBar> {
+  bool _isOnline = true;
 
   @override
   Widget build(BuildContext context) {
@@ -34,29 +41,118 @@ class SideNavBar extends StatelessWidget {
       child: Column(
         children: [
           _buildHeader(),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          _buildStatusToggle(),
+          const SizedBox(height: 8),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  _buildNavItem(context, 0, 'Dashboard', Iconsax.element_3, '/dashboard'),
-                  _buildNavItem(context, 1, 'Available Medicines', Iconsax.health, '/available-medicines'),
-                  _buildNavItem(context, 2, 'My Inventory', Iconsax.box, '/medicine-inventory'),
-                  _buildNavItem(context, 3, 'Order Management', Iconsax.receipt, '/dashboard'),
-                  _buildNavItem(context, 4, 'Payments & Earnings', Iconsax.wallet, '/dashboard'),
+                  _buildNavItem(
+                    context,
+                    0,
+                    'Dashboard',
+                    Iconsax.element_3,
+                    '/dashboard',
+                  ),
+                  _buildNavItem(
+                    context,
+                    1,
+                    'Available Medicines',
+                    Iconsax.health,
+                    '/available-medicines',
+                  ),
+                  _buildNavItem(
+                    context,
+                    3,
+                    'Order Management',
+                    Iconsax.receipt,
+                    '/dashboard',
+                  ),
+                  _buildNavItem(
+                    context,
+                    4,
+                    'Payments & Earnings',
+                    Iconsax.wallet,
+                    '/dashboard',
+                  ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                     child: Divider(color: AppColors.divider, thickness: 1),
                   ),
-                  _buildNavItem(context, 5, 'Profile', Iconsax.user, '/profile'),
-                  _buildNavItem(context, 6, 'Settings', Iconsax.setting_2, '/settings'),
+                  _buildNavItem(
+                    context,
+                    5,
+                    'Profile',
+                    Iconsax.user,
+                    '/profile',
+                  ),
+                  _buildNavItem(
+                    context,
+                    6,
+                    'Settings',
+                    Iconsax.setting_2,
+                    '/settings',
+                  ),
                 ],
               ),
             ),
           ),
           _buildFooter(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusToggle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: _isOnline
+              ? Colors.green.withAlpha(20)
+              : Colors.red.withAlpha(20),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isOnline
+                ? Colors.green.withAlpha(50)
+                : Colors.red.withAlpha(50),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              _isOnline ? Iconsax.wifi : Iconsax.wifi_square,
+              color: _isOnline ? Colors.green : Colors.red,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _isOnline ? 'Online' : 'Offline',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _isOnline ? Colors.green : Colors.red,
+                ),
+              ),
+            ),
+            Switch(
+              value: _isOnline,
+              onChanged: (value) {
+                setState(() {
+                  _isOnline = value;
+                });
+              },
+              activeThumbColor: Colors.green,
+              activeTrackColor: Colors.green.withAlpha(50),
+              inactiveThumbColor: Colors.red,
+              inactiveTrackColor: Colors.red.withAlpha(50),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -101,10 +197,7 @@ class SideNavBar extends StatelessWidget {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    Text(
-                      'Partner Portal',
-                      style: AppTextStyles.caption,
-                    ),
+                    Text('Partner Portal', style: AppTextStyles.caption),
                   ],
                 ),
               ),
@@ -115,14 +208,20 @@ class SideNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, int index, String title, IconData icon, String route) {
-    final isSelected = selectedIndex == index;
+  Widget _buildNavItem(
+    BuildContext context,
+    int index,
+    String title,
+    IconData icon,
+    String route,
+  ) {
+    final isSelected = widget.selectedIndex == index;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
-          onItemSelected(index);
+          widget.onItemSelected(index);
           Scaffold.of(context).closeDrawer();
           context.go(route);
         },
@@ -131,10 +230,14 @@ class SideNavBar extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary.withAlpha(25) : Colors.transparent,
+            color: isSelected
+                ? AppColors.primary.withAlpha(25)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? AppColors.primary.withAlpha(50) : Colors.transparent,
+              color: isSelected
+                  ? AppColors.primary.withAlpha(50)
+                  : Colors.transparent,
             ),
           ),
           child: Row(
@@ -150,7 +253,9 @@ class SideNavBar extends StatelessWidget {
                 style: AppTextStyles.description.copyWith(
                   fontSize: 15,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
                 ),
               ),
               if (isSelected) ...[
@@ -184,7 +289,11 @@ class SideNavBar extends StatelessWidget {
           CircleAvatar(
             radius: 18,
             backgroundColor: AppColors.blush,
-            child: const Icon(Iconsax.user, size: 20, color: AppColors.textPrimary),
+            child: const Icon(
+              Iconsax.user,
+              size: 20,
+              color: AppColors.textPrimary,
+            ),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -200,10 +309,7 @@ class SideNavBar extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                Text(
-                  'Store Owner',
-                  style: AppTextStyles.caption,
-                ),
+                Text('Store Owner', style: AppTextStyles.caption),
               ],
             ),
           ),

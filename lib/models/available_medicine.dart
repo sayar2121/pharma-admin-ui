@@ -8,6 +8,11 @@ class AvailableMedicine {
   final String? medicineComposition;
   final List<String>? precautions;
   final double mrp;
+  final double? discountPercent;
+  final double? finalSellingPrice;
+  final bool? prescriptionRequired;
+  final String? createdAt;
+  final String? updatedAt;
 
   AvailableMedicine({
     this.medicineId,
@@ -19,6 +24,11 @@ class AvailableMedicine {
     this.medicineComposition,
     this.precautions,
     required this.mrp,
+    this.discountPercent,
+    this.finalSellingPrice,
+    this.prescriptionRequired,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory AvailableMedicine.fromJson(Map<String, dynamic> json) {
@@ -33,7 +43,16 @@ class AvailableMedicine {
       precautions: json['precautions'] != null 
           ? List<String>.from(json['precautions'].map((x) => x.toString())) 
           : null,
-      mrp: (json['mrp'] ?? 0.0).toDouble(),
+      mrp: json['mrp'] != null ? (double.tryParse(json['mrp'].toString()) ?? 0.0) : 0.0,
+      discountPercent: json['discount_percent'] != null ? double.tryParse(json['discount_percent'].toString()) : null,
+      finalSellingPrice: json['final_selling_price'] != null ? double.tryParse(json['final_selling_price'].toString()) : null,
+      prescriptionRequired: json['prescription_required'] != null 
+          ? (json['prescription_required'] is bool 
+              ? json['prescription_required'] 
+              : json['prescription_required'].toString().toLowerCase() == 'true')
+          : null,
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
     );
   }
 
@@ -48,6 +67,11 @@ class AvailableMedicine {
       'medicine_composition': medicineComposition,
       'precautions': precautions,
       'mrp': mrp,
+      'discount_percent': discountPercent,
+      'final_selling_price': finalSellingPrice,
+      'prescription_required': prescriptionRequired,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
     };
   }
 }

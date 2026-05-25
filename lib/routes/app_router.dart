@@ -6,14 +6,9 @@ import '../screens/dashboard/dashboard_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/profile/update_profile_screen.dart';
 import '../screens/available_medicine/available_medicine_screen.dart';
-import '../screens/medicine_inventory/add_to_inventory_screen.dart';
-import '../screens/medicine_inventory/medicine_inventory_screen.dart';
-import '../screens/medicine_inventory/medicine_details_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/about_us/about_us_screen.dart';
 import '../screens/privacy_policy/privacy_policy_screen.dart';
-import '../models/available_medicine.dart';
-import '../models/medicine_inventory.dart';
 import '../screens/terms_conditions/terms_conditions_screen.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -37,24 +32,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/available-medicines',
       builder: (context, state) => const AvailableMedicineScreen(),
-    ),
-    GoRoute(
-      path: '/add-to-inventory',
-      builder: (context, state) {
-        final medicine = state.extra as AvailableMedicine;
-        return AddToInventoryScreen(medicine: medicine);
-      },
-    ),
-    GoRoute(
-      path: '/medicine-inventory',
-      builder: (context, state) => const MedicineInventoryScreen(),
-    ),
-    GoRoute(
-      path: '/medicine-details',
-      builder: (context, state) {
-        final item = state.extra as MedicineInventory;
-        return MedicineDetailsScreen(inventoryItem: item);
-      },
     ),
     GoRoute(
       path: '/settings',

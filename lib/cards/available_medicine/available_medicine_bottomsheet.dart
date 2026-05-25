@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:go_router/go_router.dart';
 import '../../models/available_medicine.dart';
 import '../../services/api_url.dart';
 import '../../theme/app_theme.dart';
@@ -66,7 +65,8 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                         color: AppColors.background,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: AppColors.divider),
-                        image: medicine.medicinePhoto != null &&
+                        image:
+                            medicine.medicinePhoto != null &&
                                 medicine.medicinePhoto!.isNotEmpty
                             ? DecorationImage(
                                 image: NetworkImage(
@@ -76,7 +76,8 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                               )
                             : null,
                       ),
-                      child: medicine.medicinePhoto == null ||
+                      child:
+                          medicine.medicinePhoto == null ||
                               medicine.medicinePhoto!.isEmpty
                           ? const Icon(
                               Iconsax.health,
@@ -114,12 +115,46 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          '₹${medicine.mrp.toStringAsFixed(2)}',
-                          style: AppTextStyles.header.copyWith(
-                            color: AppColors.primary,
-                            fontSize: 24,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              '₹${(medicine.finalSellingPrice ?? medicine.mrp).toStringAsFixed(2)}',
+                              style: AppTextStyles.header.copyWith(
+                                color: AppColors.primary,
+                                fontSize: 24,
+                              ),
+                            ),
+                            if (medicine.discountPercent != null &&
+                                medicine.discountPercent! > 0) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                '₹${medicine.mrp.toStringAsFixed(2)}',
+                                style: AppTextStyles.caption.copyWith(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.error.withAlpha(20),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '${medicine.discountPercent}% OFF',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.error,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ],
                     ),
@@ -142,6 +177,12 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                         'Quantity',
                         medicine.medicineQuantity,
                       ),
+                      if (medicine.prescriptionRequired != null)
+                        _buildDetailRow(
+                          Iconsax.document_text,
+                          'Prescription Required',
+                          medicine.prescriptionRequired! ? 'Yes' : 'No',
+                        ),
                       if (medicine.medicineComposition != null &&
                           medicine.medicineComposition!.isNotEmpty)
                         _buildDetailRow(
@@ -164,52 +205,6 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Premium Add Button
-              Container(
-                width: double.infinity,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withAlpha(80),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.push('/add-to-inventory', extra: medicine);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Iconsax.add_square, color: Colors.white, size: 22),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Add to My Inventory',
-                        style: AppTextStyles.cardTitle.copyWith(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         );
