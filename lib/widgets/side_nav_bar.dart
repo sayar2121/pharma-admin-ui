@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import '../theme/app_theme.dart';
+import '../providers/order_provider.dart';
 
-class SideNavBar extends StatefulWidget {
+class SideNavBar extends ConsumerStatefulWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
@@ -14,12 +16,10 @@ class SideNavBar extends StatefulWidget {
   });
 
   @override
-  State<SideNavBar> createState() => _SideNavBarState();
+  ConsumerState<SideNavBar> createState() => _SideNavBarState();
 }
 
-class _SideNavBarState extends State<SideNavBar> {
-  bool _isOnline = true;
-
+class _SideNavBarState extends ConsumerState<SideNavBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -68,7 +68,7 @@ class _SideNavBarState extends State<SideNavBar> {
                     3,
                     'Order Management',
                     Iconsax.receipt,
-                    '/dashboard',
+                    '/order-management',
                   ),
                   _buildNavItem(
                     context,
@@ -106,17 +106,19 @@ class _SideNavBarState extends State<SideNavBar> {
   }
 
   Widget _buildStatusToggle() {
+    final isOnline = ref.watch(orderProvider).isOnline;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: _isOnline
+          color: isOnline
               ? Colors.green.withAlpha(20)
               : Colors.red.withAlpha(20),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _isOnline
+            color: isOnline
                 ? Colors.green.withAlpha(50)
                 : Colors.red.withAlpha(50),
           ),
@@ -124,27 +126,25 @@ class _SideNavBarState extends State<SideNavBar> {
         child: Row(
           children: [
             Icon(
-              _isOnline ? Iconsax.wifi : Iconsax.wifi_square,
-              color: _isOnline ? Colors.green : Colors.red,
+              isOnline ? Iconsax.wifi : Iconsax.wifi_square,
+              color: isOnline ? Colors.green : Colors.red,
               size: 20,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _isOnline ? 'Online' : 'Offline',
+                isOnline ? 'Online' : 'Offline',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: _isOnline ? Colors.green : Colors.red,
+                  color: isOnline ? Colors.green : Colors.red,
                 ),
               ),
             ),
             Switch(
-              value: _isOnline,
+              value: isOnline,
               onChanged: (value) {
-                setState(() {
-                  _isOnline = value;
-                });
+                ref.read(orderProvider.notifier).setOnlineStatus(value);
               },
               activeThumbColor: Colors.green,
               activeTrackColor: Colors.green.withAlpha(50),

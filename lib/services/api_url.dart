@@ -1,6 +1,8 @@
 class ApiUrl {
   static const String baseUrl =
       "http://10.0.2.2:8000"; // Replace with your actual backend URL
+  static const String wsBaseUrl =
+      "ws://10.0.2.2:8000"; // Replace with your actual WebSocket URL
 
   // Pharma Shop Authentication and Profile Endpoints
   static const String signup = "$baseUrl/auth/pharma-shop/signup";
@@ -23,6 +25,9 @@ class ApiUrl {
 
   // Helper for image URLs
   static String imageUrl(String path) => "$baseUrl/$path";
+
+  // WebSocket Endpoints
+  static String shopWebSocket(String shopId) => "$wsBaseUrl/orders-ws/shop/$shopId";
 
   // Terms and Conditions Endpoints
   static const String termsConditions = "$baseUrl/terms-conditions";

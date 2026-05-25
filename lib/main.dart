@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'theme/app_theme.dart';
 import 'routes/app_router.dart';
+import 'widgets/global_order_overlay.dart';
 
 void main() {
   runApp(
@@ -21,6 +22,7 @@ class PharmaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: appRouter,
+      builder: (context, child) => GlobalOrderOverlay(child: child!),
     );
   }
 }
