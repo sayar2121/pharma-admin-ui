@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../models/order.dart';
@@ -159,24 +160,43 @@ class OrderPopup extends StatelessWidget {
                         const SizedBox(height: 12),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            order.prescriptionImage!,
-                            width: double.infinity,
-                            height: 150,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  width: double.infinity,
-                                  height: 150,
-                                  color: AppColors.divider,
-                                  alignment: Alignment.center,
-                                  child: const Icon(
-                                    Iconsax.image,
-                                    color: AppColors.textSecondary,
-                                    size: 40,
-                                  ),
-                                ),
-                          ),
+                          child: order.prescriptionImage!.startsWith('data:image')
+                            ? Image.memory(
+                                base64Decode(order.prescriptionImage!.split(',').last),
+                                width: double.infinity,
+                                height: 150,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: double.infinity,
+                                      height: 150,
+                                      color: AppColors.divider,
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                        Iconsax.image,
+                                        color: AppColors.textSecondary,
+                                        size: 40,
+                                      ),
+                                    ),
+                              )
+                            : Image.network(
+                                order.prescriptionImage!,
+                                width: double.infinity,
+                                height: 150,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: double.infinity,
+                                      height: 150,
+                                      color: AppColors.divider,
+                                      alignment: Alignment.center,
+                                      child: const Icon(
+                                        Iconsax.image,
+                                        color: AppColors.textSecondary,
+                                        size: 40,
+                                      ),
+                                    ),
+                              ),
                         ),
                         const Divider(height: 32),
                       ],
