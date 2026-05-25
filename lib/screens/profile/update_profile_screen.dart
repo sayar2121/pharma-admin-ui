@@ -31,7 +31,10 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   late TextEditingController _gstinController;
   late TextEditingController _drugLicenseController;
   late TextEditingController _panCardController;
-  late TextEditingController _bankPassbookController;
+  late TextEditingController _bankAccountNoController;
+  late TextEditingController _bankIfscCodeController;
+  late TextEditingController _bankNameController;
+  late TextEditingController _bankAccountNameController;
   late TextEditingController _regCertController;
   late TextEditingController _shopPhotoController;
 
@@ -74,9 +77,10 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
       text: user?.drugLicenseUpload,
     );
     _panCardController = TextEditingController(text: user?.panCardUpload);
-    _bankPassbookController = TextEditingController(
-      text: user?.bankPassbookUpload,
-    );
+    _bankAccountNoController = TextEditingController(text: user?.bankAccountNo);
+    _bankIfscCodeController = TextEditingController(text: user?.bankIfscCode);
+    _bankNameController = TextEditingController(text: user?.bankName);
+    _bankAccountNameController = TextEditingController(text: user?.bankAccountName);
     _regCertController = TextEditingController(
       text: user?.registrationCertificateUpload,
     );
@@ -95,7 +99,10 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     _gstinController.dispose();
     _drugLicenseController.dispose();
     _panCardController.dispose();
-    _bankPassbookController.dispose();
+    _bankAccountNoController.dispose();
+    _bankIfscCodeController.dispose();
+    _bankNameController.dispose();
+    _bankAccountNameController.dispose();
     _regCertController.dispose();
     _shopPhotoController.dispose();
     super.dispose();
@@ -114,7 +121,10 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
       shopPhoto: _shopPhotoController.text,
       drugLicenseUpload: _drugLicenseController.text,
       panCardUpload: _panCardController.text,
-      bankPassbookUpload: _bankPassbookController.text,
+      bankAccountNo: _bankAccountNoController.text,
+      bankIfscCode: _bankIfscCodeController.text,
+      bankName: _bankNameController.text,
+      bankAccountName: _bankAccountNameController.text,
       registrationCertificateUpload: _regCertController.text,
     );
 
@@ -228,14 +238,32 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                 Iconsax.document_upload,
               ),
               _buildModernPickerField(
-                'Bank Passbook',
-                _bankPassbookController,
-                Iconsax.document_upload,
-              ),
-              _buildModernPickerField(
                 'Registration Cert',
                 _regCertController,
                 Iconsax.document_upload,
+              ),
+            ]),
+            const SizedBox(height: 24),
+            _buildModernSection('BANKING DETAILS', [
+              _buildModernEditableField(
+                'Bank Name',
+                _bankNameController,
+                Iconsax.bank,
+              ),
+              _buildModernEditableField(
+                'Account Holder Name',
+                _bankAccountNameController,
+                Iconsax.user,
+              ),
+              _buildModernEditableField(
+                'Account Number',
+                _bankAccountNoController,
+                Iconsax.card,
+              ),
+              _buildModernEditableField(
+                'IFSC Code',
+                _bankIfscCodeController,
+                Iconsax.code,
               ),
             ]),
             const SizedBox(height: 40),

@@ -18,7 +18,7 @@ class SignupScreen extends ConsumerStatefulWidget {
 class _SignupScreenState extends ConsumerState<SignupScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  final int _totalSteps = 7;
+  final int _totalSteps = 8;
 
   // Controllers
   final _shopNameController = TextEditingController();
@@ -32,7 +32,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _gstinController = TextEditingController();
   final _drugLicenseController = TextEditingController();
   final _panCardController = TextEditingController();
-  final _bankPassbookController = TextEditingController();
+  final _bankAccountNoController = TextEditingController();
+  final _bankIfscCodeController = TextEditingController();
+  final _bankNameController = TextEditingController();
+  final _bankAccountNameController = TextEditingController();
   final _regCertController = TextEditingController();
 
   final ImagePicker _imagePicker = ImagePicker();
@@ -96,7 +99,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       gstinNo: _gstinController.text,
       drugLicenseUpload: _drugLicenseController.text,
       panCardUpload: _panCardController.text,
-      bankPassbookUpload: _bankPassbookController.text,
+      bankAccountNo: _bankAccountNoController.text,
+      bankIfscCode: _bankIfscCodeController.text,
+      bankName: _bankNameController.text,
+      bankAccountName: _bankAccountNameController.text,
       registrationCertificateUpload: _regCertController.text,
     );
 
@@ -207,10 +213,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       'PAN Card',
                       Iconsax.document_upload,
                     ),
-                    _buildPickerField(
-                      _bankPassbookController,
-                      'Bank Passbook',
-                      Iconsax.document_upload,
+                  ]),
+                  _buildSlide('Bank Details', 'Where we send your money', [
+                    _buildTextField(
+                      _bankNameController,
+                      'Bank Name',
+                      Iconsax.bank,
+                    ),
+                    _buildTextField(
+                      _bankAccountNameController,
+                      'Account Holder Name',
+                      Iconsax.user,
+                    ),
+                    _buildTextField(
+                      _bankAccountNoController,
+                      'Account Number',
+                      Iconsax.card,
+                    ),
+                    _buildTextField(
+                      _bankIfscCodeController,
+                      'IFSC Code',
+                      Iconsax.code,
                     ),
                   ]),
                   _buildSlide('Final Step', 'Almost there!', [

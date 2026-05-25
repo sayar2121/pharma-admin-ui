@@ -40,7 +40,6 @@ class AuthService {
       final fileFieldMapping = {
         'drug_license_upload': 'drug_license',
         'pan_card_upload': 'pan_card',
-        'bank_passbook_upload': 'bank_passbook',
         'registration_certificate_upload': 'registration_certificate',
         'shop_photo': 'shop_photo',
       };
@@ -79,7 +78,6 @@ class AuthService {
       final fileFieldMapping = {
         'drug_license_upload': 'drug_license',
         'pan_card_upload': 'pan_card',
-        'bank_passbook_upload': 'bank_passbook',
         'registration_certificate_upload': 'registration_certificate',
         'shop_photo': 'shop_photo',
       };

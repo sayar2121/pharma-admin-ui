@@ -13,7 +13,10 @@ class User {
   final String? gstinNo;
   final String drugLicenseUpload;
   final String panCardUpload;
-  final String bankPassbookUpload;
+  final String bankAccountNo;
+  final String bankIfscCode;
+  final String bankName;
+  final String bankAccountName;
   final String registrationCertificateUpload;
   final String? status;
 
@@ -30,7 +33,10 @@ class User {
     this.gstinNo,
     required this.drugLicenseUpload,
     required this.panCardUpload,
-    required this.bankPassbookUpload,
+    required this.bankAccountNo,
+    required this.bankIfscCode,
+    required this.bankName,
+    required this.bankAccountName,
     required this.registrationCertificateUpload,
     this.status,
   });
@@ -49,7 +55,10 @@ class User {
       'gstin_no': gstinNo,
       'drug_license_upload': drugLicenseUpload,
       'pan_card_upload': panCardUpload,
-      'bank_passbook_upload': bankPassbookUpload,
+      'bank_account_no': bankAccountNo,
+      'bank_ifsc_code': bankIfscCode,
+      'bank_name': bankName,
+      'bank_account_name': bankAccountName,
       'registration_certificate_upload': registrationCertificateUpload,
       'status': status,
     };
@@ -69,7 +78,10 @@ class User {
       gstinNo: map['gstin_no'],
       drugLicenseUpload: map['drug_license_upload'] ?? '',
       panCardUpload: map['pan_card_upload'] ?? '',
-      bankPassbookUpload: map['bank_passbook_upload'] ?? '',
+      bankAccountNo: map['bank_account_no'] ?? '',
+      bankIfscCode: map['bank_ifsc_code'] ?? '',
+      bankName: map['bank_name'] ?? '',
+      bankAccountName: map['bank_account_name'] ?? '',
       registrationCertificateUpload: map['registration_certificate_upload'] ?? '',
       status: map['status'],
     );
