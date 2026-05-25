@@ -70,7 +70,12 @@ class OrderPopup extends StatelessWidget {
                             'New Order Request',
                             style: AppTextStyles.cardTitle,
                           ),
-                          Text('ID: ${order.id}', style: AppTextStyles.caption),
+                          Text(
+                            'ID: ${order.id}', 
+                            style: AppTextStyles.caption,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),

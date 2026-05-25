@@ -22,10 +22,10 @@ class OrderBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch order state so bottomsheet updates if order status changes while open
-    final currentOrder = ref.watch(orderProvider).activeOrders.firstWhere(
-          (o) => o.id == order.id,
-          orElse: () => order,
-        );
+    final currentOrder = ref
+        .watch(orderProvider)
+        .activeOrders
+        .firstWhere((o) => o.id == order.id, orElse: () => order);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
@@ -47,7 +47,7 @@ class OrderBottomSheet extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -55,23 +55,32 @@ class OrderBottomSheet extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Order ${currentOrder.id}', style: AppTextStyles.header),
+                      Expanded(
+                        child: Text(
+                          'Order ${currentOrder.id}',
+                          style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
                       _buildStatusBadge(currentOrder.status),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Customer Details
                   _buildSectionTitle('Customer Information'),
                   _buildInfoRow(Iconsax.user, currentOrder.customer.name),
                   _buildInfoRow(Iconsax.call, currentOrder.customer.phone),
                   if (currentOrder.customer.address != null)
-                    _buildInfoRow(Iconsax.location, currentOrder.customer.address!),
-                  
+                    _buildInfoRow(
+                      Iconsax.location,
+                      currentOrder.customer.address!,
+                    ),
+
                   const Divider(height: 32),
-                  
+
                   // Rider Details
                   if (currentOrder.rider != null) ...[
                     _buildSectionTitle('Delivery Rider'),
@@ -82,33 +91,48 @@ class OrderBottomSheet extends ConsumerWidget {
 
                   // Medicines
                   _buildSectionTitle('Medicines'),
-                  ...currentOrder.items.map((item) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        Text('${item.quantity}x', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(item.name)),
-                        Text('₹${item.totalPrice.toStringAsFixed(2)}'),
-                      ],
+                  ...currentOrder.items.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${item.quantity}x',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(item.name)),
+                          Text('₹${item.totalPrice.toStringAsFixed(2)}'),
+                        ],
+                      ),
                     ),
-                  )),
-                  
+                  ),
+
                   const Divider(height: 32),
-                  
+
                   // Pricing
                   _buildSectionTitle('Earnings Breakdown'),
                   _buildPriceRow('Total Order Value', currentOrder.totalAmount),
-                  _buildPriceRow('Platform Charges', -currentOrder.platformCharges),
+                  _buildPriceRow(
+                    'Platform Charges',
+                    -currentOrder.platformCharges,
+                  ),
                   _buildPriceRow('Taxes', -currentOrder.taxes),
                   _buildPriceRow('Delivery Fee', -currentOrder.deliveryFee),
                   const Divider(),
-                  _buildPriceRow('Net Earnings', currentOrder.pharmacyEarnings, isTotal: true),
+                  _buildPriceRow(
+                    'Net Earnings',
+                    currentOrder.pharmacyEarnings,
+                    isTotal: true,
+                  ),
                 ],
               ),
             ),
           ),
-          
+
           // Action Buttons
           Container(
             padding: const EdgeInsets.all(24),
@@ -139,7 +163,9 @@ class OrderBottomSheet extends ConsumerWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        ref.read(orderProvider.notifier).informCustomer(currentOrder.id);
+                        ref
+                            .read(orderProvider.notifier)
+                            .informCustomer(currentOrder.id);
                       },
                       child: const Text('Inform Customer & Request Rider'),
                     ),
@@ -181,15 +207,20 @@ class OrderBottomSheet extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(
-            color: isTotal ? AppColors.primary : AppColors.textPrimary,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            fontSize: isTotal ? 16 : 14,
-          )),
+          Text(
+            label,
+            style: TextStyle(
+              color: isTotal ? AppColors.primary : AppColors.textPrimary,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              fontSize: isTotal ? 16 : 14,
+            ),
+          ),
           Text(
             '${amount < 0 ? "-" : ""}₹${amount.abs().toStringAsFixed(2)}',
             style: TextStyle(
-              color: amount < 0 ? AppColors.error : (isTotal ? AppColors.primary : AppColors.textPrimary),
+              color: amount < 0
+                  ? AppColors.error
+                  : (isTotal ? AppColors.primary : AppColors.textPrimary),
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
               fontSize: isTotal ? 16 : 14,
             ),
@@ -200,24 +231,39 @@ class OrderBottomSheet extends ConsumerWidget {
   }
 
   Widget _buildStatusBadge(String status) {
+    Color bgColor = AppColors.primary.withAlpha(20);
+    Color textColor = AppColors.primary;
+
+    if (status == 'packing' || status == 'ready_for_delivery') {
+      bgColor = Colors.orange.withAlpha(20);
+      textColor = Colors.orange;
+    } else if (status == 'out_for_delivery' || status == 'delivered') {
+      bgColor = Colors.green.withAlpha(20);
+      textColor = Colors.green;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withAlpha(20),
-        borderRadius: BorderRadius.circular(12),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.toUpperCase(),
-        style: const TextStyle(
-          color: AppColors.primary,
+        status.toUpperCase().replaceAll('_', ' '),
+        style: TextStyle(
+          color: textColor,
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
   }
 
-  void _showRiderInfoDialog(BuildContext context, WidgetRef ref, String orderId) {
+  void _showRiderInfoDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String orderId,
+  ) {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
 
@@ -248,12 +294,15 @@ class OrderBottomSheet extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                if (nameController.text.isNotEmpty && phoneController.text.isNotEmpty) {
-                  ref.read(orderProvider.notifier).markReadyForDelivery(
-                    orderId,
-                    riderName: nameController.text,
-                    riderPhone: phoneController.text,
-                  );
+                if (nameController.text.isNotEmpty &&
+                    phoneController.text.isNotEmpty) {
+                  ref
+                      .read(orderProvider.notifier)
+                      .markReadyForDelivery(
+                        orderId,
+                        riderName: nameController.text,
+                        riderPhone: phoneController.text,
+                      );
                   Navigator.pop(context);
                 }
               },
@@ -265,4 +314,3 @@ class OrderBottomSheet extends ConsumerWidget {
     );
   }
 }
-
