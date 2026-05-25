@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../models/user.dart';
 import '../services/auth_services.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthState {
   final User? user;
@@ -23,6 +24,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService _authService;
   AuthNotifier(this._authService) : super(AuthState());
 
+  Future<bool> checkLoginStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = prefs.getString('user_data');
+      if (userJson != null) {
+        final user = User.fromJson(userJson);
+        state = state.copyWith(user: user);
+        return true;
+      }
+    } catch (e) {
+      // Ignore parsing errors, user will just have to login again
+    }
+    return false;
+  }
+
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -34,6 +50,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userData['shop_id'],
         );
         final user = User.fromMap(fullDetailsResponse.data);
+        
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_data', user.toJson());
+        
         state = state.copyWith(user: user, isLoading: false);
       }
     } catch (e) {
@@ -67,7 +87,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_data');
     state = AuthState();
   }
 }
