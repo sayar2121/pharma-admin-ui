@@ -9,6 +9,25 @@ class OrderCard extends StatelessWidget {
 
   const OrderCard({super.key, required this.order, required this.onTap});
 
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    final month = months[date.month - 1];
+    final day = date.day.toString().padLeft(2, '0');
+    final year = date.year;
+    
+    int hour = date.hour;
+    final amPm = hour >= 12 ? 'PM' : 'AM';
+    if (hour == 0) hour = 12;
+    if (hour > 12) hour -= 12;
+    
+    final minute = date.minute.toString().padLeft(2, '0');
+    
+    return '$day $month $year, $hour:$minute $amPm';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -47,7 +66,7 @@ class OrderCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            order.id,
+                            _formatDate(order.createdAt),
                             style: AppTextStyles.cardTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -127,6 +146,12 @@ class OrderCard extends StatelessWidget {
                                   style: AppTextStyles.description.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  order.customer.phone,
+                                  style: AppTextStyles.caption,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),

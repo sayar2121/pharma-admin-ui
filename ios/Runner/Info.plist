@@ -72,6 +72,8 @@
 	<string>This app requires access to the camera to take shop photos and documents.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires access to the microphone for recording videos if needed.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs your location to help select the shop location on the map.</string>
 
 </dict>
 </plist>

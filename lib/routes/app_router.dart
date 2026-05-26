@@ -11,6 +11,7 @@ import '../screens/settings/settings_screen.dart';
 import '../screens/about_us/about_us_screen.dart';
 import '../screens/privacy_policy/privacy_policy_screen.dart';
 import '../screens/terms_conditions/terms_conditions_screen.dart';
+import '../screens/map/map_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -53,6 +54,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/privacy-policy',
       builder: (context, state) => const PrivacyPolicyScreen(),
+    ),
+    GoRoute(
+      path: '/map',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        return MapScreen(
+          initialLatitude: extra?['latitude'] as double?,
+          initialLongitude: extra?['longitude'] as double?,
+        );
+      },
     ),
   ],
 );

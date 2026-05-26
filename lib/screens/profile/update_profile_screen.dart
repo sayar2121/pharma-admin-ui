@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,6 +30,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   late TextEditingController _passwordController;
   late TextEditingController _whatsappController;
   late TextEditingController _gstinController;
+  late TextEditingController _latitudeController;
+  late TextEditingController _longitudeController;
   late TextEditingController _drugLicenseController;
   late TextEditingController _panCardController;
   late TextEditingController _bankAccountNoController;
@@ -73,6 +76,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     _passwordController = TextEditingController(text: user?.shopPassword);
     _whatsappController = TextEditingController(text: user?.whatsappNumber);
     _gstinController = TextEditingController(text: user?.gstinNo);
+    _latitudeController = TextEditingController(text: user?.latitude);
+    _longitudeController = TextEditingController(text: user?.longitude);
     _drugLicenseController = TextEditingController(
       text: user?.drugLicenseUpload,
     );
@@ -97,6 +102,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     _passwordController.dispose();
     _whatsappController.dispose();
     _gstinController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
     _drugLicenseController.dispose();
     _panCardController.dispose();
     _bankAccountNoController.dispose();
@@ -110,6 +117,7 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
 
   void _saveProfile() {
     final updatedUser = User(
+      shopId: ref.read(authProvider).user?.shopId,
       shopName: _nameController.text,
       shopAddress: _addressController.text,
       shopPhoneNo: _phoneController.text,
@@ -118,6 +126,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
       shopPassword: _passwordController.text,
       whatsappNumber: _whatsappController.text,
       gstinNo: _gstinController.text,
+      latitude: _latitudeController.text,
+      longitude: _longitudeController.text,
       shopPhoto: _shopPhotoController.text,
       drugLicenseUpload: _drugLicenseController.text,
       panCardUpload: _panCardController.text,
@@ -136,6 +146,26 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
         backgroundColor: AppColors.success,
       ),
     );
+  }
+
+  Future<void> _openMapPicker() async {
+    if (!_isEditing) return;
+    final latValue = double.tryParse(_latitudeController.text);
+    final lngValue = double.tryParse(_longitudeController.text);
+    final result = await context.push<Map<String, String>>(
+      '/map',
+      extra: {
+        'latitude': latValue,
+        'longitude': lngValue,
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _latitudeController.text = result['latitude'] ?? '';
+        _longitudeController.text = result['longitude'] ?? '';
+      });
+    }
   }
 
   @override
@@ -180,6 +210,20 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                 'Shop Address',
                 _addressController,
                 Iconsax.location,
+              ),
+              _buildModernEditableField(
+                'Latitude',
+                _latitudeController,
+                Iconsax.gps,
+                readOnly: true,
+                onTap: _openMapPicker,
+              ),
+              _buildModernEditableField(
+                'Longitude',
+                _longitudeController,
+                Iconsax.gps_slash,
+                readOnly: true,
+                onTap: _openMapPicker,
               ),
               _buildModernEditableField(
                 'Phone Number',
@@ -357,6 +401,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
     TextEditingController controller,
     IconData icon, {
     bool isPassword = false,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -384,6 +430,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                   controller: controller,
                   enabled: _isEditing,
                   obscureText: isPassword,
+                  readOnly: readOnly,
+                  onTap: onTap,
                   style: AppTextStyles.description.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,

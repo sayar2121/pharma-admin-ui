@@ -11,6 +11,8 @@ class User {
   final String shopPassword;
   final String? whatsappNumber;
   final String? gstinNo;
+  final String latitude;
+  final String longitude;
   final String drugLicenseUpload;
   final String panCardUpload;
   final String bankAccountNo;
@@ -31,6 +33,8 @@ class User {
     required this.shopPassword,
     this.whatsappNumber,
     this.gstinNo,
+    required this.latitude,
+    required this.longitude,
     required this.drugLicenseUpload,
     required this.panCardUpload,
     required this.bankAccountNo,
@@ -53,6 +57,8 @@ class User {
       'shop_password': shopPassword,
       'whatsapp_number': whatsappNumber,
       'gstin_no': gstinNo,
+      'latitude': latitude,
+      'longitude': longitude,
       'drug_license_upload': drugLicenseUpload,
       'pan_card_upload': panCardUpload,
       'bank_account_no': bankAccountNo,
@@ -76,6 +82,8 @@ class User {
       shopPassword: map['shop_password'] ?? '',
       whatsappNumber: map['whatsapp_number'],
       gstinNo: map['gstin_no'],
+      latitude: map['latitude'] ?? '',
+      longitude: map['longitude'] ?? '',
       drugLicenseUpload: map['drug_license_upload'] ?? '',
       panCardUpload: map['pan_card_upload'] ?? '',
       bankAccountNo: map['bank_account_no'] ?? '',

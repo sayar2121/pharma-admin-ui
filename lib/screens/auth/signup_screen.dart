@@ -30,6 +30,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _shopPasswordController = TextEditingController();
   final _whatsappController = TextEditingController();
   final _gstinController = TextEditingController();
+  final _latitudeController = TextEditingController();
+  final _longitudeController = TextEditingController();
   final _drugLicenseController = TextEditingController();
   final _panCardController = TextEditingController();
   final _bankAccountNoController = TextEditingController();
@@ -97,6 +99,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       shopPassword: _shopPasswordController.text,
       whatsappNumber: _whatsappController.text,
       gstinNo: _gstinController.text,
+      latitude: _latitudeController.text,
+      longitude: _longitudeController.text,
       drugLicenseUpload: _drugLicenseController.text,
       panCardUpload: _panCardController.text,
       bankAccountNo: _bankAccountNoController.text,
@@ -130,6 +134,25 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     });
   }
 
+  Future<void> _openMapPicker() async {
+    final latValue = double.tryParse(_latitudeController.text);
+    final lngValue = double.tryParse(_longitudeController.text);
+    final result = await context.push<Map<String, String>>(
+      '/map',
+      extra: {
+        'latitude': latValue,
+        'longitude': lngValue,
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        _latitudeController.text = result['latitude'] ?? '';
+        _longitudeController.text = result['longitude'] ?? '';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,6 +178,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       _shopAddressController,
                       'Shop Address',
                       Iconsax.location,
+                    ),
+                    _buildTextField(
+                      _latitudeController,
+                      'Latitude',
+                      Iconsax.gps,
+                      readOnly: true,
+                      onTap: _openMapPicker,
+                    ),
+                    _buildTextField(
+                      _longitudeController,
+                      'Longitude',
+                      Iconsax.gps_slash,
+                      readOnly: true,
+                      onTap: _openMapPicker,
                     ),
                   ]),
                   _buildSlide('Contact Info', 'How can customers reach you?', [
@@ -409,10 +446,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     String label,
     IconData icon, {
     bool isPassword = false,
+    bool readOnly = false,
+    VoidCallback? onTap,
   }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
+      readOnly: readOnly,
+      onTap: onTap,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
