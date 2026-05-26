@@ -8,11 +8,26 @@ import '../../theme/app_theme.dart';
 import '../../widgets/side_nav_bar.dart';
 import '../../widgets/app_bar.dart';
 
-class OrderManagementScreen extends ConsumerWidget {
+class OrderManagementScreen extends ConsumerStatefulWidget {
   const OrderManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OrderManagementScreen> createState() =>
+      _OrderManagementScreenState();
+}
+
+class _OrderManagementScreenState
+    extends ConsumerState<OrderManagementScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(orderProvider.notifier).ensureConnectedAndFetch();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final activeOrders = ref.watch(orderProvider).activeOrders;
 
     return Scaffold(

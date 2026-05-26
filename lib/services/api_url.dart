@@ -36,4 +36,7 @@ class ApiUrl {
   // Privacy Policy Endpoints
   static const String privacyPolicies = "$baseUrl/privacy-policies";
   static const String getPrivacyPoliciesAll = "$privacyPolicies/get-all";
+
+    // Rider Order Request Endpoint
+    static const String createCustomerOrder = "http://192.168.0.222:8000/customer_orders/create";
 }

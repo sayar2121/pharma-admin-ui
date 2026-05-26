@@ -21,8 +21,9 @@ class OrderBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final orderState = ref.watch(orderProvider);
     final currentOrder = ref
-        .watch(orderProvider)
+      .watch(orderProvider)
         .activeOrders
         .firstWhere((o) => o.id == order.id, orElse: () => order);
 
@@ -251,9 +252,26 @@ class OrderBottomSheet extends ConsumerWidget {
                   ? SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          _showRiderInfoDialog(context, ref, currentOrder.id);
-                        },
+                        onPressed: orderState.isRequestingRider
+                            ? null
+                            : () async {
+                                final success = await ref
+                                    .read(orderProvider.notifier)
+                                    .requestRiderForOrder(currentOrder);
+                                final message = success
+                                    ? 'Rider request created successfully'
+                                    : (ref.read(orderProvider).requestError ??
+                                        'Failed to request rider');
+                                // ignore: use_build_context_synchronously
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(message),
+                                    backgroundColor: success
+                                        ? AppColors.success
+                                        : AppColors.error,
+                                  ),
+                                );
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -262,13 +280,22 @@ class OrderBottomSheet extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
-                          'Mark Ready for Delivery',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: orderState.isRequestingRider
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Mark Ready for Delivery',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     )
                   : SizedBox(
@@ -394,86 +421,4 @@ class OrderBottomSheet extends ConsumerWidget {
     );
   }
 
-  void _showRiderInfoDialog(
-    BuildContext context,
-    WidgetRef ref,
-    String orderId,
-  ) {
-    final nameController = TextEditingController();
-    final phoneController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            'Rider Information',
-            style: AppTextStyles.cardTitle,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Rider Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Iconsax.user),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Rider Phone',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Iconsax.call),
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty &&
-                    phoneController.text.isNotEmpty) {
-                  ref
-                      .read(orderProvider.notifier)
-                      .markReadyForDelivery(
-                        orderId,
-                        riderName: nameController.text,
-                        riderPhone: phoneController.text,
-                      );
-                  Navigator.pop(context);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

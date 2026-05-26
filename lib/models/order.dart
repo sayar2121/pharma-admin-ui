@@ -3,27 +3,41 @@ class Customer {
   final String name;
   final String phone;
   final String? address;
+  final double? latitude;
+  final double? longitude;
 
   Customer({
     required this.id,
     required this.name,
     required this.phone,
     this.address,
+    this.latitude,
+    this.longitude,
   });
 
   factory Customer.fromJson(Map<String, dynamic> json) {
     String? addr;
+    double? lat;
+    double? lng;
     if (json['delivery_address'] is Map) {
-      addr = json['delivery_address']['address'] as String?;
+      final addrMap = json['delivery_address'] as Map;
+      addr = addrMap['address'] as String?;
+      lat = _parseDouble(addrMap['lat'] ?? addrMap['latitude']);
+      lng = _parseDouble(addrMap['lng'] ?? addrMap['longitude']);
     } else {
       addr = json['delivery_address']?.toString();
     }
+
+    lat ??= _parseDouble(json['delivery_lat'] ?? json['drop_lat']);
+    lng ??= _parseDouble(json['delivery_lng'] ?? json['drop_lng']);
 
     return Customer(
       id: json['customer_id'] ?? '',
       name: json['receiver_name'] ?? 'Unknown',
       phone: json['receiver_phone'] ?? '',
       address: addr,
+      latitude: lat,
+      longitude: lng,
     );
   }
 
@@ -33,8 +47,16 @@ class Customer {
       'receiver_name': name,
       'receiver_phone': phone,
       'delivery_address': address,
+      'delivery_lat': latitude,
+      'delivery_lng': longitude,
     };
   }
+}
+
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
 }
 
 class Rider {
@@ -118,6 +140,7 @@ class Order {
   final double pharmacyEarnings;
   final String? prescriptionImage;
   final String status; // 'broadcast', 'accepted', 'packing', 'out_for_delivery', 'delivered', 'cancelled'
+  final String? paymentMethod;
   final Customer customer;
   final Rider? rider;
   final DateTime createdAt;
@@ -133,6 +156,7 @@ class Order {
     required this.pharmacyEarnings,
     this.prescriptionImage,
     required this.status,
+    this.paymentMethod,
     required this.customer,
     this.rider,
     required this.createdAt,
@@ -164,6 +188,7 @@ class Order {
       pharmacyEarnings: earnings,
       prescriptionImage: json['prescription_url'],
       status: json['order_status'] ?? 'broadcast',
+      paymentMethod: json['payment_method'],
       customer: Customer.fromJson(json),
       rider: riderDetails,
       createdAt: json['created_at'] != null 
@@ -183,6 +208,7 @@ class Order {
       'delivery_fee': deliveryFee,
       'prescription_url': prescriptionImage,
       'order_status': status,
+      'payment_method': paymentMethod,
       'created_at': createdAt.toIso8601String(),
       ...customer.toJson(),
       if (rider != null) ...rider!.toJson(),
@@ -192,6 +218,7 @@ class Order {
   Order copyWith({
     String? status,
     Rider? rider,
+    String? paymentMethod,
   }) {
     return Order(
       id: id,
@@ -204,6 +231,7 @@ class Order {
       pharmacyEarnings: pharmacyEarnings,
       prescriptionImage: prescriptionImage,
       status: status ?? this.status,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
       customer: customer,
       rider: rider ?? this.rider,
       createdAt: createdAt,

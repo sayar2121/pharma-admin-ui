@@ -2,28 +2,38 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/order.dart';
+import '../models/request_rider_order.dart';
+import '../models/user.dart';
 import '../services/order_services.dart';
 
 class OrderState {
   final bool isOnline;
   final List<Order> incomingOrders;
   final List<Order> activeOrders;
+  final bool isRequestingRider;
+  final String? requestError;
 
   OrderState({
     this.isOnline = false,
     this.incomingOrders = const [],
     this.activeOrders = const [],
+    this.isRequestingRider = false,
+    this.requestError,
   });
 
   OrderState copyWith({
     bool? isOnline,
     List<Order>? incomingOrders,
     List<Order>? activeOrders,
+    bool? isRequestingRider,
+    String? requestError,
   }) {
     return OrderState(
       isOnline: isOnline ?? this.isOnline,
       incomingOrders: incomingOrders ?? this.incomingOrders,
       activeOrders: activeOrders ?? this.activeOrders,
+      isRequestingRider: isRequestingRider ?? this.isRequestingRider,
+      requestError: requestError,
     );
   }
 }
@@ -31,9 +41,11 @@ class OrderState {
 class OrderNotifier extends StateNotifier<OrderState> {
   final OrderService _orderService;
   final String? _shopId;
+  final User? _user;
   StreamSubscription? _subscription;
 
-  OrderNotifier(this._orderService, this._shopId) : super(OrderState()) {
+  OrderNotifier(this._orderService, this._shopId, this._user)
+      : super(OrderState()) {
     _subscription = _orderService.messageStream.listen(_onMessage);
   }
 
@@ -121,6 +133,17 @@ class OrderNotifier extends StateNotifier<OrderState> {
     }
   }
 
+  void ensureConnectedAndFetch() {
+    if (_shopId == null) return;
+    if (!_orderService.isConnected) {
+      _orderService.connect(_shopId);
+    }
+    _orderService.getShopOrders(1);
+    if (!state.isOnline) {
+      state = state.copyWith(isOnline: true);
+    }
+  }
+
   void acceptOrder(String orderId) {
     _orderService.acceptOrder(orderId);
   }
@@ -132,12 +155,71 @@ class OrderNotifier extends StateNotifier<OrderState> {
     state = state.copyWith(incomingOrders: newIncoming);
   }
 
-  void markReadyForDelivery(String orderId, {required String riderName, required String riderPhone}) {
-    _orderService.updatePacking(
-      orderId,
-      riderName: riderName,
-      riderPhone: riderPhone,
-    );
+  Future<bool> requestRiderForOrder(Order order) async {
+    final user = _user;
+    if (user == null) {
+      state = state.copyWith(
+        isRequestingRider: false,
+        requestError: 'Shop details not available',
+      );
+      return false;
+    }
+
+    final pickupLat = double.tryParse(user.latitude) ?? 0.0;
+    final pickupLng = double.tryParse(user.longitude) ?? 0.0;
+    final dropLat = order.customer.latitude ?? 0.0;
+    final dropLng = order.customer.longitude ?? 0.0;
+
+    if (pickupLat == 0.0 || pickupLng == 0.0) {
+      state = state.copyWith(
+        isRequestingRider: false,
+        requestError: 'Shop location is missing',
+      );
+      return false;
+    }
+
+    if (dropLat == 0.0 || dropLng == 0.0) {
+      state = state.copyWith(
+        isRequestingRider: false,
+        requestError: 'Customer location is missing',
+      );
+      return false;
+    }
+
+    state = state.copyWith(isRequestingRider: true, requestError: null);
+    try {
+      final request = RequestRiderOrder(
+        orderType: 'medicine',
+        vehicleType: 'bike',
+        pickupAddress: user.shopAddress,
+        pickupLat: pickupLat,
+        pickupLng: pickupLng,
+        pickupContactName: user.shopName,
+        pickupContactPhone: user.shopPhoneNo,
+        dropAddress: order.customer.address ?? '',
+        dropLat: dropLat,
+        dropLng: dropLng,
+        dropContactName: order.customer.name,
+        dropContactPhone: order.customer.phone,
+        distanceKm: 2,
+        estimatedTimeMins: 5,
+        paymentMethod: order.paymentMethod ?? 'cod',
+        itemCount: order.items.length,
+        parcelType: null,
+        weightKg: null,
+      );
+
+      final response = await _orderService.createCustomerOrder(request);
+      final isOk = response.statusCode == 200 || response.statusCode == 201;
+      state = state.copyWith(isRequestingRider: false);
+      return isOk;
+    } catch (e) {
+      state = state.copyWith(
+        isRequestingRider: false,
+        requestError: e.toString(),
+      );
+      return false;
+    }
   }
 
   void informCustomer(String orderId) {

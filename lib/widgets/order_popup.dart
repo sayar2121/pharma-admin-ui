@@ -63,17 +63,10 @@ class OrderPopup extends StatelessWidget {
                               'New Order',
                               style: AppTextStyles.cardTitle.copyWith(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 22,
                               ),
                             ),
-                            Text(
-                              'ID: ${order.id}',
-                              style: AppTextStyles.caption.copyWith(
-                                color: Colors.white70,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            
                           ],
                         ),
                       ),
@@ -94,7 +87,7 @@ class OrderPopup extends StatelessWidget {
                           '₹${order.totalAmount.toStringAsFixed(0)}',
                           style: const TextStyle(
                             fontFamily: 'Lexend',
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
                             fontSize: 14,
                           ),

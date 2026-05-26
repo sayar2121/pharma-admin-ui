@@ -13,5 +13,5 @@ final orderServiceProvider = Provider<OrderService>((ref) {
 final orderProvider = StateNotifierProvider<OrderNotifier, OrderState>((ref) {
   final orderService = ref.watch(orderServiceProvider);
   final authState = ref.watch(authProvider);
-  return OrderNotifier(orderService, authState.user?.shopId);
+  return OrderNotifier(orderService, authState.user?.shopId, authState.user);
 });
