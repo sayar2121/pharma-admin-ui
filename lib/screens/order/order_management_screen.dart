@@ -6,6 +6,7 @@ import '../../cards/order/order_card.dart';
 import '../../cards/order/order_bottomsheet.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/side_nav_bar.dart';
+import '../../widgets/app_bar.dart';
 
 class OrderManagementScreen extends ConsumerWidget {
   const OrderManagementScreen({super.key});
@@ -16,23 +17,28 @@ class OrderManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Order Management'),
-        backgroundColor: Colors.white,
+      appBar: const CustomAppBar(
+        title: 'Order Management',
+        subtitle: 'Manage incoming and active orders',
+        showDrawer: true,
       ),
-      drawer: SideNavBar(
-        selectedIndex: 3,
-        onItemSelected: (_) {},
-      ),
+      drawer: SideNavBar(selectedIndex: 3, onItemSelected: (_) {}),
       body: activeOrders.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Iconsax.receipt_item, size: 64, color: AppColors.textSecondary.withAlpha(100)),
+                  Icon(
+                    Iconsax.receipt_item,
+                    size: 64,
+                    color: AppColors.textSecondary.withAlpha(100),
+                  ),
                   const SizedBox(height: 16),
                   const Text('No active orders', style: AppTextStyles.header),
-                  const Text('Toggle online mode to receive orders', style: AppTextStyles.caption),
+                  const Text(
+                    'Toggle online mode to receive orders',
+                    style: AppTextStyles.caption,
+                  ),
                 ],
               ),
             )

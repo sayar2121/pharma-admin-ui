@@ -13,23 +13,12 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(10),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: AppColors.divider.withAlpha(80), width: 1),
-      ),
+      decoration: AppCardStyles.sleekCard,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -39,37 +28,57 @@ class OrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withAlpha(20),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         order.type == 'prescription'
-                            ? Iconsax.document
-                            : Iconsax.shopping_cart,
-                        color: AppColors.primary,
-                        size: 20,
+                            ? Iconsax.document_text
+                            : Iconsax.shopping_bag,
+                        color: AppColors.primaryAccent,
+                        size: 22,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Order ${order.id}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                            order.id,
+                            style: AppTextStyles.cardTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            '${order.items.length} item(s) • ${order.type.toUpperCase()}',
-                            style: AppTextStyles.caption,
+                          Row(
+                            children: [
+                              const Icon(
+                                Iconsax.box,
+                                size: 14,
+                                color: AppColors.textTertiary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${order.items.length} item(s)',
+                                style: AppTextStyles.caption,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                '•',
+                                style: TextStyle(color: AppColors.textTertiary),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                order.type.toUpperCase(),
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.primaryAccent,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -80,22 +89,49 @@ class OrderCard extends StatelessWidget {
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Divider(height: 1),
+                  child: Divider(color: AppColors.divider, height: 1),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          const Text('Customer', style: AppTextStyles.caption),
-                          const SizedBox(height: 4),
-                          Text(
-                            order.customer.name,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: AppColors.infoLight,
+                            child: Text(
+                              order.customer.name.isNotEmpty
+                                  ? order.customer.name
+                                        .substring(0, 1)
+                                        .toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                color: AppColors.info,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Customer',
+                                  style: AppTextStyles.caption,
+                                ),
+                                Text(
+                                  order.customer.name,
+                                  style: AppTextStyles.description.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -107,13 +143,12 @@ class OrderCard extends StatelessWidget {
                           'Net Earnings',
                           style: AppTextStyles.caption,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           '₹${order.pharmacyEarnings.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                          style: AppTextStyles.cardTitle.copyWith(
+                            color: AppColors.success,
+                            fontSize: 18,
                           ),
                         ),
                       ],
@@ -135,28 +170,28 @@ class OrderCard extends StatelessWidget {
 
     switch (order.status) {
       case 'accepted':
-        bgColor = Colors.blue.withAlpha(30);
-        textColor = Colors.blue;
+        bgColor = AppColors.infoLight;
+        textColor = AppColors.info;
         label = 'Accepted';
         break;
       case 'packing':
-        bgColor = Colors.orange.withAlpha(30);
-        textColor = Colors.orange;
+        bgColor = AppColors.warningLight;
+        textColor = AppColors.warning;
         label = 'Packing';
         break;
       case 'ready_for_delivery':
-        bgColor = Colors.orange.withAlpha(30);
-        textColor = Colors.orange;
+        bgColor = AppColors.warningLight;
+        textColor = AppColors.warning;
         label = 'Ready';
         break;
       case 'out_for_delivery':
-        bgColor = Colors.green.withAlpha(30);
-        textColor = Colors.green;
+        bgColor = AppColors.successLight;
+        textColor = AppColors.success;
         label = 'Dispatched';
         break;
       case 'delivered':
-        bgColor = Colors.green.withAlpha(30);
-        textColor = Colors.green;
+        bgColor = AppColors.successLight;
+        textColor = AppColors.success;
         label = 'Delivered';
         break;
       default:
@@ -166,17 +201,17 @@ class OrderCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: textColor,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

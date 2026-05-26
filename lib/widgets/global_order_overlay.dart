@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/order_provider.dart';
@@ -34,16 +35,47 @@ class GlobalOrderOverlay extends ConsumerWidget {
         child,
         if (shouldShowPopup)
           Positioned.fill(
-            child: Container(
-              color: Colors.black.withAlpha(150),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, animChild) {
+                return Stack(
+                  children: [
+                    // Glassmorphism blur effect
+                    BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 8 * value, sigmaY: 8 * value),
+                      child: Container(
+                        color: Colors.black.withAlpha((120 * value).toInt()),
+                      ),
+                    ),
+                    // Popup with scaling animation
+                    Transform.scale(
+                      scale: 0.95 + (0.05 * value),
+                      child: Opacity(
+                        opacity: value,
+                        child: animChild,
+                      ),
+                    ),
+                  ],
+                );
+              },
               child: SafeArea(
-                child: OrderPopup(
-                  order: orderState.incomingOrders.first,
-                  onAccept: () {
-                    ref.read(orderProvider.notifier).acceptOrder(orderState.incomingOrders.first.id);
-                  },
-                  onReject: () {
-                    ref.read(orderProvider.notifier).rejectOrder(orderState.incomingOrders.first.id);
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  itemCount: orderState.incomingOrders.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 40),
+                  itemBuilder: (context, index) {
+                    final order = orderState.incomingOrders[index];
+                    return OrderPopup(
+                      order: order,
+                      onAccept: () {
+                        ref.read(orderProvider.notifier).acceptOrder(order.id);
+                      },
+                      onReject: () {
+                        ref.read(orderProvider.notifier).rejectOrder(order.id);
+                      },
+                    );
                   },
                 ),
               ),
