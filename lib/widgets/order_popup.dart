@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../models/order.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_url.dart';
+import '../../cards/order/prescription_preview_card.dart';
 
 class OrderPopup extends StatelessWidget {
   final Order order;
@@ -214,65 +216,85 @@ class OrderPopup extends StatelessWidget {
                             )),
 
                         // Compact Prescription Thumbnail
-                        if (order.prescriptionImage != null) ...[
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: order.prescriptionImage!.startsWith('data:image')
-                                      ? Image.memory(
-                                          base64Decode(order.prescriptionImage!.split(',').last),
-                                          width: 40,
-                                          height: 40,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: _buildImageError,
-                                        )
-                                      : Image.network(
-                                          order.prescriptionImage!,
-                                          width: 40,
-                                          height: 40,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: _buildImageError,
-                                        ),
+                        if (order.prescriptionImage != null && order.prescriptionImage!.isNotEmpty) ...[
+                          Builder(builder: (context) {
+                            final isBase64 = order.prescriptionImage!.startsWith('data:image');
+                            final imageUrl = isBase64
+                                ? order.prescriptionImage!
+                                : (order.prescriptionImage!.startsWith('http')
+                                    ? order.prescriptionImage!
+                                    : '${ApiUrl.baseUrl}/${order.prescriptionImage!.startsWith('/') ? order.prescriptionImage!.substring(1) : order.prescriptionImage!}');
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PrescriptionPreviewCard(
+                                      imageUrl: imageUrl,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 4, bottom: 12),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Prescription Attached',
-                                        style: AppTextStyles.cardTitle.copyWith(fontSize: 13),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: isBase64
+                                          ? Image.memory(
+                                              base64Decode(order.prescriptionImage!.split(',').last),
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: _buildImageError,
+                                            )
+                                          : Image.network(
+                                              imageUrl,
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: _buildImageError,
+                                            ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Prescription Attached',
+                                            style: AppTextStyles.cardTitle.copyWith(fontSize: 13),
+                                          ),
+                                          Text(
+                                            'Tap to view details',
+                                            style: AppTextStyles.caption.copyWith(fontSize: 11),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        'Tap to view details',
-                                        style: AppTextStyles.caption.copyWith(fontSize: 11),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.secondaryCyan.withAlpha(20),
+                                        shape: BoxShape.circle,
                                       ),
-                                    ],
-                                  ),
+                                      child: const Icon(
+                                        Iconsax.document_download,
+                                        size: 16,
+                                        color: AppColors.secondaryCyan,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.secondaryCyan.withAlpha(20),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Iconsax.document_download,
-                                    size: 16,
-                                    color: AppColors.secondaryCyan,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          }),
                         ],
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),

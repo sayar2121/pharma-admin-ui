@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -27,31 +28,46 @@ class PrescriptionPreviewCard extends StatelessWidget {
           boundaryMargin: const EdgeInsets.all(20),
           minScale: 0.5,
           maxScale: 4.0,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          (loadingProgress.expectedTotalBytes ?? 1)
-                      : null,
+          child: imageUrl.startsWith('data:image')
+              ? Image.memory(
+                  base64Decode(imageUrl.split(',').last),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red, size: 50),
+                        SizedBox(height: 10),
+                        Text('Failed to load image', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                )
+              : Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                (loadingProgress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red, size: 50),
+                        SizedBox(height: 10),
+                        Text('Failed to load image', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
                 ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) => const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 50),
-                  SizedBox(height: 10),
-                  Text('Failed to load image', style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );
