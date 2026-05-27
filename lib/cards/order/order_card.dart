@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../models/order.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_url.dart';
+import 'prescription_preview_card.dart';
 
 class OrderCard extends StatelessWidget {
   final Order order;
@@ -190,6 +192,47 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (order.type == 'prescription' && order.prescriptionImage != null && order.prescriptionImage!.isNotEmpty) ...[
+                  Builder(builder: (context) {
+                    final imageUrl = order.prescriptionImage!.startsWith('http')
+                        ? order.prescriptionImage!
+                        : '${ApiUrl.baseUrl}/${order.prescriptionImage!.startsWith('/') ? order.prescriptionImage!.substring(1) : order.prescriptionImage!}';
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PrescriptionPreviewCard(
+                                  imageUrl: imageUrl,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.divider),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ],
               ],
             ),
           ),

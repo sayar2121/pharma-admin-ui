@@ -4,6 +4,8 @@ import 'package:iconsax/iconsax.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_url.dart';
+import 'prescription_preview_card.dart';
 
 class OrderBottomSheet extends ConsumerWidget {
   final Order order;
@@ -133,6 +135,53 @@ class OrderBottomSheet extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(vertical: 24),
                     child: Divider(color: AppColors.divider, height: 1),
                   ),
+
+                  if (currentOrder.type == 'prescription' && currentOrder.prescriptionImage != null && currentOrder.prescriptionImage!.isNotEmpty) ...[
+                    Builder(builder: (context) {
+                      final imageUrl = currentOrder.prescriptionImage!.startsWith('http')
+                          ? currentOrder.prescriptionImage!
+                          : '${ApiUrl.baseUrl}/${currentOrder.prescriptionImage!.startsWith('/') ? currentOrder.prescriptionImage!.substring(1) : currentOrder.prescriptionImage!}';
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle(Iconsax.document_text, 'Prescription'),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PrescriptionPreviewCard(
+                                    imageUrl: imageUrl,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              height: 200,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.divider),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Divider(color: AppColors.divider, height: 1),
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
 
                   // Medicines
                   _buildSectionTitle(Iconsax.box, 'Medicines'),
