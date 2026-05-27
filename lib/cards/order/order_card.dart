@@ -11,20 +11,30 @@ class OrderCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final month = months[date.month - 1];
     final day = date.day.toString().padLeft(2, '0');
     final year = date.year;
-    
+
     int hour = date.hour;
     final amPm = hour >= 12 ? 'PM' : 'AM';
     if (hour == 0) hour = 12;
     if (hour > 12) hour -= 12;
-    
+
     final minute = date.minute.toString().padLeft(2, '0');
-    
+
     return '$day $month $year, $hour:$minute $amPm';
   }
 
@@ -84,12 +94,12 @@ class OrderCard extends StatelessWidget {
                                 '${order.items.length} item(s)',
                                 style: AppTextStyles.caption,
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 4),
                               const Text(
                                 '•',
                                 style: TextStyle(color: AppColors.textTertiary),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 4),
                               Text(
                                 order.type.toUpperCase(),
                                 style: AppTextStyles.caption.copyWith(
