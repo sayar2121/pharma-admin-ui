@@ -118,21 +118,24 @@ class ProfileHeaderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withAlpha(60)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Iconsax.verify, color: Colors.white, size: 14),
-          const SizedBox(width: 6),
-          Text(
-            'VERIFIED PARTNER',
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1,
-              fontSize: 10,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Iconsax.verify, color: Colors.white, size: 14),
+            const SizedBox(width: 6),
+            Text(
+              'VERIFIED PARTNER',
+              style: AppTextStyles.caption.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+                fontSize: 10,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

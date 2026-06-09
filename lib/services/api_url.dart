@@ -1,8 +1,8 @@
 class ApiUrl {
   static const String baseUrl =
-      "http://10.0.2.2:8000"; // Replace with your actual backend URL
+      "http://192.168.0.222:8009"; // Replace with your actual backend URL
   static const String wsBaseUrl =
-      "ws://10.0.2.2:8000"; // Replace with your actual WebSocket URL
+      "ws://192.168.0.222:8009"; // Replace with your actual WebSocket URL
 
   // Pharma Shop Authentication and Profile Endpoints
   static const String signup = "$baseUrl/auth/pharma-shop/signup";
@@ -24,10 +24,17 @@ class ApiUrl {
   static String getAboutUsById(int id) => "$aboutUs/get-by/$id";
 
   // Helper for image URLs
-  static String imageUrl(String path) => "$baseUrl/$path";
+  static String imageUrl(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return "$baseUrl/$cleanPath";
+  }
 
   // WebSocket Endpoints
-  static String shopWebSocket(String shopId) => "$wsBaseUrl/orders-ws/shop/$shopId";
+  static String shopWebSocket(String shopId) =>
+      "$wsBaseUrl/orders-ws/shop/$shopId";
 
   // Terms and Conditions Endpoints
   static const String termsConditions = "$baseUrl/terms-conditions";
@@ -37,6 +44,10 @@ class ApiUrl {
   static const String privacyPolicies = "$baseUrl/privacy-policies";
   static const String getPrivacyPoliciesAll = "$privacyPolicies/get-all";
 
-    // Rider Order Request Endpoint
-    static const String createCustomerOrder = "http://192.168.0.222:8000/customer_orders/create";
+  // Rider Order Request Endpoint
+  static const String createCustomerOrder =
+      "http://192.168.0.222:8000/customer_orders/create";
+
+  static String trackOrderWs(String orderId) =>
+      "ws://192.168.0.222:8000/customer_orders/ws/track/$orderId";
 }

@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/order.dart';
 import '../models/request_rider_order.dart';
 import '../models/user.dart';
 import '../services/order_services.dart';
+import '../services/api_url.dart';
 
 class OrderState {
   final bool isOnline;
@@ -12,6 +15,8 @@ class OrderState {
   final List<Order> activeOrders;
   final bool isRequestingRider;
   final String? requestError;
+  final Set<String> fetchingRidersFor;
+  final Set<String> ridersFetchedFor;
 
   OrderState({
     this.isOnline = false,
@@ -19,6 +24,8 @@ class OrderState {
     this.activeOrders = const [],
     this.isRequestingRider = false,
     this.requestError,
+    this.fetchingRidersFor = const {},
+    this.ridersFetchedFor = const {},
   });
 
   OrderState copyWith({
@@ -27,6 +34,8 @@ class OrderState {
     List<Order>? activeOrders,
     bool? isRequestingRider,
     String? requestError,
+    Set<String>? fetchingRidersFor,
+    Set<String>? ridersFetchedFor,
   }) {
     return OrderState(
       isOnline: isOnline ?? this.isOnline,
@@ -34,6 +43,8 @@ class OrderState {
       activeOrders: activeOrders ?? this.activeOrders,
       isRequestingRider: isRequestingRider ?? this.isRequestingRider,
       requestError: requestError,
+      fetchingRidersFor: fetchingRidersFor ?? this.fetchingRidersFor,
+      ridersFetchedFor: ridersFetchedFor ?? this.ridersFetchedFor,
     );
   }
 }
@@ -44,8 +55,9 @@ class OrderNotifier extends StateNotifier<OrderState> {
   final User? _user;
   StreamSubscription? _subscription;
 
+
   OrderNotifier(this._orderService, this._shopId, this._user)
-      : super(OrderState()) {
+    : super(OrderState()) {
     _subscription = _orderService.messageStream.listen(_onMessage);
   }
 
@@ -86,7 +98,8 @@ class OrderNotifier extends StateNotifier<OrderState> {
           print("Failed to parse orders list: \$e");
         }
       }
-    } else if (type == 'pending_broadcast_orders' || type == 'broadcast_orders_list') {
+    } else if (type == 'pending_broadcast_orders' ||
+        type == 'broadcast_orders_list') {
       try {
         final ordersData = data['data'] as List;
         final orders = ordersData.map((e) => Order.fromJson(e)).toList();
@@ -114,9 +127,22 @@ class OrderNotifier extends StateNotifier<OrderState> {
         .where((o) => o.id != updatedOrder.id)
         .toList();
 
+    Set<String> newFetched = state.ridersFetchedFor;
+    Set<String> newFetching = state.fetchingRidersFor;
+    
+    // If the updated order has a rider (e.g. from a global WS event), stop the searching spinner
+    if (updatedOrder.rider != null) {
+      if (!newFetched.contains(updatedOrder.id)) {
+        newFetched = Set<String>.from(state.ridersFetchedFor)..add(updatedOrder.id);
+        newFetching = Set<String>.from(state.fetchingRidersFor)..remove(updatedOrder.id);
+      }
+    }
+
     state = state.copyWith(
       activeOrders: newActive,
       incomingOrders: newIncoming,
+      ridersFetchedFor: newFetched,
+      fetchingRidersFor: newFetching,
     );
   }
 
@@ -190,7 +216,7 @@ class OrderNotifier extends StateNotifier<OrderState> {
     try {
       final request = RequestRiderOrder(
         orderType: 'medicine',
-        vehicleType: 'bike',
+        vehicleType: 'medicine_bike',
         pickupAddress: user.shopAddress,
         pickupLat: pickupLat,
         pickupLng: pickupLng,
@@ -212,6 +238,12 @@ class OrderNotifier extends StateNotifier<OrderState> {
       final response = await _orderService.createCustomerOrder(request);
       final isOk = response.statusCode == 200 || response.statusCode == 201;
       state = state.copyWith(isRequestingRider: false);
+      
+      if (isOk) {
+        // Automatically start searching for a rider via WS
+        fetchAndInformCustomer(order.id);
+      }
+      
       return isOk;
     } catch (e) {
       state = state.copyWith(
@@ -224,6 +256,86 @@ class OrderNotifier extends StateNotifier<OrderState> {
 
   void informCustomer(String orderId) {
     _orderService.updateStatus(orderId, 'out_for_delivery');
+  }
+
+  Future<bool> fetchAndInformCustomer(String orderId) async {
+    if (state.fetchingRidersFor.contains(orderId) || state.ridersFetchedFor.contains(orderId)) return false;
+
+    final newFetching = Set<String>.from(state.fetchingRidersFor)..add(orderId);
+    state = state.copyWith(fetchingRidersFor: newFetching);
+
+    final wsUrl = Uri.parse(ApiUrl.trackOrderWs(orderId));
+    final channel = WebSocketChannel.connect(wsUrl);
+    final completer = Completer<bool>();
+
+    final sub = channel.stream.listen(
+      (message) {
+        try {
+          final data = jsonDecode(message) as Map<String, dynamic>;
+          if (data['type'] == 'driver_assigned' || data['assigned_driver_name'] != null || data['rider_name'] != null || data['driver_name'] != null || data['driver'] != null) {
+            final riderData = data['driver'] ?? data;
+            
+            final riderName = riderData['assigned_driver_name'] ?? riderData['rider_name'] ?? riderData['driver_name'] ?? riderData['name'] ?? 'Unknown Rider';
+            final riderPhone = riderData['assigned_driver_phone'] ?? riderData['rider_phone'] ?? riderData['driver_phone'] ?? riderData['phone'] ?? 'N/A';
+            final vehicleNumber = riderData['vehicle_number'];
+            final vehicleModel = riderData['vehicle_model'];
+
+            _orderService.updatePacking(
+              orderId,
+              riderName: riderName,
+              riderPhone: riderPhone,
+              vehicleNumber: vehicleNumber,
+              vehicleModel: vehicleModel,
+            );
+            
+            // Mark the order as out for delivery now that a driver has accepted it
+            _orderService.updateStatus(orderId, 'out_for_delivery');
+            
+            try {
+              final existingOrder = state.activeOrders.firstWhere((o) => o.id == orderId);
+              final newRider = Rider(
+                id: riderData['assigned_driver_id'] ?? riderData['rider_id'] ?? riderData['driver_id'] ?? riderData['id'] ?? '',
+                name: riderName,
+                phone: riderPhone,
+                vehicleNumber: vehicleNumber,
+                vehicleModel: vehicleModel,
+              );
+              _updateActiveOrder(existingOrder.copyWith(rider: newRider, status: 'out_for_delivery'));
+            } catch (e) {
+              if (kDebugMode) print("Order not found to update rider locally");
+            }
+            
+            if (!completer.isCompleted) completer.complete(true);
+          }
+        } catch (e) {
+          if (kDebugMode) print("Failed to decode tracking WS message: $e");
+        }
+      },
+      onError: (e) {
+        if (!completer.isCompleted) completer.completeError(e);
+      },
+      onDone: () {
+        if (!completer.isCompleted) completer.complete(false);
+      }
+    );
+
+    bool success = false;
+    try {
+      success = await completer.future.timeout(const Duration(minutes: 5));
+    } catch (e) {
+      if (kDebugMode) print("Fetching rider timed out or failed: $e");
+    } finally {
+      sub.cancel();
+      channel.sink.close();
+      
+      final nextFetching = Set<String>.from(state.fetchingRidersFor)..remove(orderId);
+      final nextFetched = Set<String>.from(state.ridersFetchedFor);
+      if (success) {
+        nextFetched.add(orderId);
+      }
+      state = state.copyWith(fetchingRidersFor: nextFetching, ridersFetchedFor: nextFetched);
+    }
+    return success;
   }
 
   @override

@@ -22,7 +22,19 @@ class PharmaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: appRouter,
-      builder: (context, child) => GlobalOrderOverlay(child: child!),
+      builder: (context, child) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            final path = appRouter.routerDelegate.currentConfiguration.uri.path;
+            if (path != '/' && path != '/login' && path != '/signup' && path != '/dashboard') {
+              appRouter.go('/dashboard');
+            }
+          },
+          child: GlobalOrderOverlay(child: child!),
+        );
+      },
     );
   }
 }

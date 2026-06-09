@@ -28,7 +28,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leadingWidth: 70,
       leading: _buildLeading(context),
       title: _buildTitle(),
-      actions: [if (actions != null) ...actions!, const SizedBox(width: 16)],
+      actions: [...?actions, const SizedBox(width: 16)],
       flexibleSpace: Container(
         decoration: const BoxDecoration(color: AppColors.background),
       ),

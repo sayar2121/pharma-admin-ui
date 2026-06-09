@@ -13,15 +13,17 @@ class OrderService {
   final Dio _dio = Dio();
 
   OrderService() {
-    _dio.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      responseHeader: false,
-      error: true,
-      compact: true,
-      maxWidth: 90,
-    ));
+    _dio.interceptors.add(
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: 90,
+      ),
+    );
   }
 
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
@@ -126,17 +128,14 @@ class OrderService {
   Future<Response> createCustomerOrder(RequestRiderOrder request) async {
     try {
       // 🚨 PHASE 1 QUICK TEST: Paste your actual token from Swagger/Postman here
-      final String testToken = "e0b3549686a40712c06a1eb60c13768076ce805d3aba2ac069a530ad4b61287a7"; 
+      final String testToken =
+          "e0b3549686a40712c06a1eb60c13768076ce805d3aba2ac069a530ad4b61287a7";
 
       return await _dio.post(
         ApiUrl.createCustomerOrder,
         data: request.toJson(),
         // 💥 Inject the Authorization header right here
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $testToken',
-          },
-        ),
+        options: Options(headers: {'Authorization': 'Bearer $testToken'}),
       );
     } catch (e) {
       rethrow;

@@ -4,7 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../models/order.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_url.dart';
-import '../../cards/order/prescription_preview_card.dart';
+import '../../routes/app_router.dart';
 
 class OrderPopup extends StatelessWidget {
   final Order order;
@@ -38,10 +38,11 @@ class OrderPopup extends StatelessWidget {
               children: [
                 // Premium Compact Header
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  decoration: const BoxDecoration(
-                    color: AppColors.darkCyan,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
+                  decoration: const BoxDecoration(color: AppColors.darkCyan),
                   child: Row(
                     children: [
                       Container(
@@ -68,12 +69,14 @@ class OrderPopup extends StatelessWidget {
                                 fontSize: 22,
                               ),
                             ),
-                            
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(12),
@@ -113,9 +116,11 @@ class OrderPopup extends StatelessWidget {
                               radius: 22,
                               backgroundColor: AppColors.infoLight,
                               child: Text(
-                                order.customer.name.isNotEmpty 
-                                  ? order.customer.name.substring(0, 1).toUpperCase() 
-                                  : '?',
+                                order.customer.name.isNotEmpty
+                                    ? order.customer.name
+                                          .substring(0, 1)
+                                          .toUpperCase()
+                                    : '?',
                                 style: const TextStyle(
                                   color: AppColors.info,
                                   fontWeight: FontWeight.bold,
@@ -130,7 +135,9 @@ class OrderPopup extends StatelessWidget {
                                 children: [
                                   Text(
                                     order.customer.name,
-                                    style: AppTextStyles.cardTitle.copyWith(fontSize: 15),
+                                    style: AppTextStyles.cardTitle.copyWith(
+                                      fontSize: 15,
+                                    ),
                                   ),
                                   Text(
                                     order.customer.phone,
@@ -170,131 +177,155 @@ class OrderPopup extends StatelessWidget {
                         // Requested Items
                         Row(
                           children: [
-                            const Icon(Iconsax.box, size: 16, color: AppColors.purple),
+                            const Icon(
+                              Iconsax.box,
+                              size: 16,
+                              color: AppColors.purple,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Requested Items',
-                              style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
+                              style: AppTextStyles.cardTitle.copyWith(
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 10),
-                        ...order.items.map((item) => Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.purple.withAlpha(20),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '${item.quantity}x',
-                                      style: AppTextStyles.caption.copyWith(
-                                        color: AppColors.purple,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                        ...order.items.map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.purple.withAlpha(20),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '${item.quantity}x',
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.purple,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      item.name,
-                                      style: AppTextStyles.description.copyWith(fontSize: 14),
-                                    ),
-                                  ),
-                                  Text(
-                                    '₹${item.totalPrice.toStringAsFixed(2)}',
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    item.name,
                                     style: AppTextStyles.description.copyWith(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                ],
-                              ),
-                            )),
+                                ),
+                                Text(
+                                  '₹${item.totalPrice.toStringAsFixed(2)}',
+                                  style: AppTextStyles.description.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
 
                         // Compact Prescription Thumbnail
-                        if (order.prescriptionImage != null && order.prescriptionImage!.isNotEmpty) ...[
-                          Builder(builder: (context) {
-                            final isBase64 = order.prescriptionImage!.startsWith('data:image');
-                            final imageUrl = isBase64
-                                ? order.prescriptionImage!
-                                : (order.prescriptionImage!.startsWith('http')
-                                    ? order.prescriptionImage!
-                                    : '${ApiUrl.baseUrl}/${order.prescriptionImage!.startsWith('/') ? order.prescriptionImage!.substring(1) : order.prescriptionImage!}');
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PrescriptionPreviewCard(
-                                      imageUrl: imageUrl,
-                                    ),
+                        if (order.prescriptionImage != null &&
+                            order.prescriptionImage!.isNotEmpty) ...[
+                          Builder(
+                            builder: (context) {
+                              final isBase64 = order.prescriptionImage!
+                                  .startsWith('data:image');
+                              final imageUrl = isBase64
+                                  ? order.prescriptionImage!
+                                  : (order.prescriptionImage!.startsWith('http')
+                                        ? order.prescriptionImage!
+                                        : '${ApiUrl.baseUrl}/${order.prescriptionImage!.startsWith('/') ? order.prescriptionImage!.substring(1) : order.prescriptionImage!}');
+                              return GestureDetector(
+                                onTap: () {
+                                  appRouter.push(
+                                    '/prescription-preview',
+                                    extra: imageUrl,
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(
+                                    top: 4,
+                                    bottom: 12,
                                   ),
-                                );
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(top: 4, bottom: 12),
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.background,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: isBase64
-                                          ? Image.memory(
-                                              base64Decode(order.prescriptionImage!.split(',').last),
-                                              width: 40,
-                                              height: 40,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: _buildImageError,
-                                            )
-                                          : Image.network(
-                                              imageUrl,
-                                              width: 40,
-                                              height: 40,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: _buildImageError,
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.background,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: isBase64
+                                            ? Image.memory(
+                                                base64Decode(
+                                                  order.prescriptionImage!
+                                                      .split(',')
+                                                      .last,
+                                                ),
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: _buildImageError,
+                                              )
+                                            : Image.network(
+                                                imageUrl,
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: _buildImageError,
+                                              ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Prescription Attached',
+                                              style: AppTextStyles.cardTitle
+                                                  .copyWith(fontSize: 13),
                                             ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Prescription Attached',
-                                            style: AppTextStyles.cardTitle.copyWith(fontSize: 13),
-                                          ),
-                                          Text(
-                                            'Tap to view details',
-                                            style: AppTextStyles.caption.copyWith(fontSize: 11),
-                                          ),
-                                        ],
+                                            Text(
+                                              'Tap to view details',
+                                              style: AppTextStyles.caption
+                                                  .copyWith(fontSize: 11),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.secondaryCyan.withAlpha(20),
-                                        shape: BoxShape.circle,
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.secondaryCyan
+                                              .withAlpha(20),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Iconsax.document_download,
+                                          size: 16,
+                                          color: AppColors.secondaryCyan,
+                                        ),
                                       ),
-                                      child: const Icon(
-                                        Iconsax.document_download,
-                                        size: 16,
-                                        color: AppColors.secondaryCyan,
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
+                              );
+                            },
+                          ),
                         ],
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
@@ -304,11 +335,17 @@ class OrderPopup extends StatelessWidget {
                         // Payment Breakdown
                         Row(
                           children: [
-                            const Icon(Iconsax.wallet_3, size: 16, color: AppColors.success),
+                            const Icon(
+                              Iconsax.wallet_3,
+                              size: 16,
+                              color: AppColors.success,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Payment Breakdown',
-                              style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
+                              style: AppTextStyles.cardTitle.copyWith(
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -322,18 +359,40 @@ class OrderPopup extends StatelessWidget {
                           ),
                           child: Column(
                             children: [
-                              _buildPriceRow('Total Order Value', order.totalAmount),
+                              _buildPriceRow(
+                                'Total Order Value',
+                                order.totalAmount,
+                              ),
                               const SizedBox(height: 6),
-                              _buildPriceRow('Platform Charges', -order.platformCharges, isDeduction: true),
+                              _buildPriceRow(
+                                'Platform Charges',
+                                -order.platformCharges,
+                                isDeduction: true,
+                              ),
                               const SizedBox(height: 6),
-                              _buildPriceRow('Taxes', -order.taxes, isDeduction: true),
+                              _buildPriceRow(
+                                'Taxes',
+                                -order.taxes,
+                                isDeduction: true,
+                              ),
                               const SizedBox(height: 6),
-                              _buildPriceRow('Delivery Fee', -order.deliveryFee, isDeduction: true),
+                              _buildPriceRow(
+                                'Delivery Fee',
+                                -order.deliveryFee,
+                                isDeduction: true,
+                              ),
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8),
-                                child: Divider(color: AppColors.success, height: 1),
+                                child: Divider(
+                                  color: AppColors.success,
+                                  height: 1,
+                                ),
                               ),
-                              _buildPriceRow('Your Earnings', order.pharmacyEarnings, isTotal: true),
+                              _buildPriceRow(
+                                'Your Earnings',
+                                order.pharmacyEarnings,
+                                isTotal: true,
+                              ),
                             ],
                           ),
                         ),
@@ -348,9 +407,7 @@ class OrderPopup extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     border: Border(
-                      top: BorderSide(
-                        color: AppColors.divider.withAlpha(128),
-                      ),
+                      top: BorderSide(color: AppColors.divider.withAlpha(128)),
                     ),
                   ),
                   child: Row(
@@ -360,7 +417,10 @@ class OrderPopup extends StatelessWidget {
                           onPressed: onReject,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.error,
-                            side: const BorderSide(color: AppColors.errorLight, width: 1.5),
+                            side: const BorderSide(
+                              color: AppColors.errorLight,
+                              width: 1.5,
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -410,17 +470,17 @@ class OrderPopup extends StatelessWidget {
     );
   }
 
-  Widget _buildImageError(BuildContext context, Object error, StackTrace? stackTrace) {
+  Widget _buildImageError(
+    BuildContext context,
+    Object error,
+    StackTrace? stackTrace,
+  ) {
     return Container(
       width: 40,
       height: 40,
       color: AppColors.divider,
       alignment: Alignment.center,
-      child: const Icon(
-        Iconsax.image,
-        color: AppColors.textTertiary,
-        size: 20,
-      ),
+      child: const Icon(Iconsax.image, color: AppColors.textTertiary, size: 20),
     );
   }
 
