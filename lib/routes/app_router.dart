@@ -12,6 +12,7 @@ import '../screens/about_us/about_us_screen.dart';
 import '../screens/privacy_policy/privacy_policy_screen.dart';
 import '../screens/terms_conditions/terms_conditions_screen.dart';
 import '../screens/map/map_screen.dart';
+import '../cards/order/prescription_preview_card.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -63,6 +64,13 @@ final GoRouter appRouter = GoRouter(
           initialLatitude: extra?['latitude'] as double?,
           initialLongitude: extra?['longitude'] as double?,
         );
+      },
+    ),
+    GoRoute(
+      path: '/prescription-preview',
+      builder: (context, state) {
+        final imageUrl = state.extra as String;
+        return PrescriptionPreviewCard(imageUrl: imageUrl);
       },
     ),
   ],

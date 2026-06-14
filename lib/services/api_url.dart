@@ -1,8 +1,8 @@
 class ApiUrl {
   static const String baseUrl =
-      "http://10.0.2.2:8000"; // Replace with your actual backend URL
+      "http://127.0.0.1:8000"; // Replace with your actual backend URL
   static const String wsBaseUrl =
-      "ws://10.0.2.2:8000"; // Replace with your actual WebSocket URL
+      "ws://127.0.0.1:8000"; // Replace with your actual WebSocket URL
 
   // Pharma Shop Authentication and Profile Endpoints
   static const String signup = "$baseUrl/auth/pharma-shop/signup";
@@ -27,7 +27,8 @@ class ApiUrl {
   static String imageUrl(String path) => "$baseUrl/$path";
 
   // WebSocket Endpoints
-  static String shopWebSocket(String shopId) => "$wsBaseUrl/orders-ws/shop/$shopId";
+  static String shopWebSocket(String shopId) =>
+      "$wsBaseUrl/orders-ws/shop/$shopId";
 
   // Terms and Conditions Endpoints
   static const String termsConditions = "$baseUrl/terms-conditions";
@@ -37,6 +38,10 @@ class ApiUrl {
   static const String privacyPolicies = "$baseUrl/privacy-policies";
   static const String getPrivacyPoliciesAll = "$privacyPolicies/get-all";
 
-    // Rider Order Request Endpoint
-    static const String createCustomerOrder = "http://192.168.0.222:8000/customer_orders/create";
+  // Rider Order Request Endpoint
+  static const String createCustomerOrder =
+      "http://127.0.0.1:8000/customer_orders/create";
+
+  static String trackOrderWs(String orderId) =>
+      "ws://127.0.0.1:8000/customer_orders/ws/track/$orderId";
 }

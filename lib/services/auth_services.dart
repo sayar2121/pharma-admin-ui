@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import '../models/user.dart';
@@ -50,8 +51,8 @@ class AuthService {
 
         if (value != null && value is String && value.isNotEmpty) {
           if (fileFieldMapping.containsKey(key)) {
-            // Check if it's a valid local path
-            if (File(value).existsSync()) {
+            // Check if it's a valid local path (Not supported on Web)
+            if (!kIsWeb && File(value).existsSync()) {
               formMap[fileFieldMapping[key]!] = await MultipartFile.fromFile(value);
             }
           } else {
@@ -89,7 +90,7 @@ class AuthService {
         if (value != null && value is String && value.isNotEmpty) {
           if (fileFieldMapping.containsKey(key)) {
             // Only upload if it's a local path (starts with / or has picker in name)
-            if ((value.startsWith('/') || value.contains('picker')) && File(value).existsSync()) {
+            if (!kIsWeb && (value.startsWith('/') || value.contains('picker')) && File(value).existsSync()) {
               formMap[fileFieldMapping[key]!] = await MultipartFile.fromFile(value);
             }
           } else {

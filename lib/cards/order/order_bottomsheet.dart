@@ -5,7 +5,8 @@ import '../../models/order.dart';
 import '../../providers/order_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_url.dart';
-import 'prescription_preview_card.dart';
+import '../../routes/app_router.dart';
+import '../../widgets/searching_rider_widget.dart';
 
 class OrderBottomSheet extends ConsumerWidget {
   final Order order;
@@ -24,10 +25,10 @@ class OrderBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderState = ref.watch(orderProvider);
-    final currentOrder = ref
-      .watch(orderProvider)
-        .activeOrders
-        .firstWhere((o) => o.id == order.id, orElse: () => order);
+    final currentOrder = orderState.activeOrders.firstWhere(
+      (o) => o.id == order.id,
+      orElse: () => order,
+    );
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
@@ -136,51 +137,58 @@ class OrderBottomSheet extends ConsumerWidget {
                     child: Divider(color: AppColors.divider, height: 1),
                   ),
 
-                  if (currentOrder.type == 'prescription' && currentOrder.prescriptionImage != null && currentOrder.prescriptionImage!.isNotEmpty) ...[
-                    Builder(builder: (context) {
-                      final imageUrl = currentOrder.prescriptionImage!.startsWith('http')
-                          ? currentOrder.prescriptionImage!
-                          : '${ApiUrl.baseUrl}/${currentOrder.prescriptionImage!.startsWith('/') ? currentOrder.prescriptionImage!.substring(1) : currentOrder.prescriptionImage!}';
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle(Iconsax.document_text, 'Prescription'),
-                          const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => PrescriptionPreviewCard(
-                                    imageUrl: imageUrl,
-                                  ),
+                  if (currentOrder.type == 'prescription' &&
+                      currentOrder.prescriptionImage != null &&
+                      currentOrder.prescriptionImage!.isNotEmpty) ...[
+                    Builder(
+                      builder: (context) {
+                        final imageUrl =
+                            currentOrder.prescriptionImage!.startsWith('http')
+                            ? currentOrder.prescriptionImage!
+                            : '${ApiUrl.baseUrl}/${currentOrder.prescriptionImage!.startsWith('/') ? currentOrder.prescriptionImage!.substring(1) : currentOrder.prescriptionImage!}';
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle(
+                              Iconsax.document_text,
+                              'Prescription',
+                            ),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: () {
+                                appRouter.push(
+                                  '/prescription-preview',
+                                  extra: imageUrl,
+                                );
+                              },
+                              child: Container(
+                                height: 200,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: AppColors.divider),
                                 ),
-                              );
-                            },
-                            child: Container(
-                              height: 200,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: AppColors.divider),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment.topCenter,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.topCenter,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24),
-                            child: Divider(color: AppColors.divider, height: 1),
-                          ),
-                        ],
-                      );
-                    }),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24),
+                              child: Divider(
+                                color: AppColors.divider,
+                                height: 1,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ],
 
                   // Medicines
@@ -284,7 +292,7 @@ class OrderBottomSheet extends ConsumerWidget {
 
           // Action Buttons
           if (currentOrder.status == 'accepted' ||
-              currentOrder.status == 'ready_for_delivery')
+              currentOrder.status == 'out_for_delivery')
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -304,22 +312,9 @@ class OrderBottomSheet extends ConsumerWidget {
                         onPressed: orderState.isRequestingRider
                             ? null
                             : () async {
-                                final success = await ref
+                                await ref
                                     .read(orderProvider.notifier)
                                     .requestRiderForOrder(currentOrder);
-                                final message = success
-                                    ? 'Rider request created successfully'
-                                    : (ref.read(orderProvider).requestError ??
-                                        'Failed to request rider');
-                                // ignore: use_build_context_synchronously
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(message),
-                                    backgroundColor: success
-                                        ? AppColors.success
-                                        : AppColors.error,
-                                  ),
-                                );
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
@@ -347,30 +342,52 @@ class OrderBottomSheet extends ConsumerWidget {
                               ),
                       ),
                     )
-                  : SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          ref
-                              .read(orderProvider.notifier)
-                              .informCustomer(currentOrder.id);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.success,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                  : Builder(
+                      builder: (context) {
+                        final isFetching = orderState.fetchingRidersFor
+                            .contains(currentOrder.id);
+                        final hasFetched = orderState.ridersFetchedFor.contains(
+                          currentOrder.id,
+                        );
+
+                        if (isFetching) {
+                          return const SearchingRiderWidget();
+                        }
+
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: hasFetched
+                                ? null
+                                : () async {
+                                    await ref
+                                        .read(orderProvider.notifier)
+                                        .fetchAndInformCustomer(
+                                          currentOrder.id,
+                                        );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: hasFetched
+                                  ? AppColors.textTertiary
+                                  : AppColors.success,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              hasFetched
+                                  ? 'Rider Assigned'
+                                  : 'Inform Customer',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Inform Customer & Request Rider',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
             ),
         ],
@@ -469,5 +486,4 @@ class OrderBottomSheet extends ConsumerWidget {
       ),
     );
   }
-
 }
