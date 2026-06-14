@@ -127,9 +127,22 @@ class OrderNotifier extends StateNotifier<OrderState> {
         .where((o) => o.id != updatedOrder.id)
         .toList();
 
+    Set<String> newFetched = state.ridersFetchedFor;
+    Set<String> newFetching = state.fetchingRidersFor;
+    
+    // If the updated order has a rider (e.g. from a global WS event), stop the searching spinner
+    if (updatedOrder.rider != null) {
+      if (!newFetched.contains(updatedOrder.id)) {
+        newFetched = Set<String>.from(state.ridersFetchedFor)..add(updatedOrder.id);
+        newFetching = Set<String>.from(state.fetchingRidersFor)..remove(updatedOrder.id);
+      }
+    }
+
     state = state.copyWith(
       activeOrders: newActive,
       incomingOrders: newIncoming,
+      ridersFetchedFor: newFetched,
+      fetchingRidersFor: newFetching,
     );
   }
 
@@ -225,12 +238,6 @@ class OrderNotifier extends StateNotifier<OrderState> {
       final response = await _orderService.createCustomerOrder(request);
       final isOk = response.statusCode == 200 || response.statusCode == 201;
       state = state.copyWith(isRequestingRider: false);
-      
-      if (isOk) {
-        _orderService.updateStatus(order.id, 'out_for_delivery');
-        _updateActiveOrder(order.copyWith(status: 'out_for_delivery'));
-      }
-      
       return isOk;
     } catch (e) {
       state = state.copyWith(
@@ -243,83 +250,6 @@ class OrderNotifier extends StateNotifier<OrderState> {
 
   void informCustomer(String orderId) {
     _orderService.updateStatus(orderId, 'out_for_delivery');
-  }
-
-  Future<bool> fetchAndInformCustomer(String orderId) async {
-    if (state.fetchingRidersFor.contains(orderId) || state.ridersFetchedFor.contains(orderId)) return false;
-
-    final newFetching = Set<String>.from(state.fetchingRidersFor)..add(orderId);
-    state = state.copyWith(fetchingRidersFor: newFetching);
-
-    final wsUrl = Uri.parse(ApiUrl.trackOrderWs(orderId));
-    final channel = WebSocketChannel.connect(wsUrl);
-    final completer = Completer<bool>();
-
-    final sub = channel.stream.listen(
-      (message) {
-        try {
-          final data = jsonDecode(message) as Map<String, dynamic>;
-          if (data['type'] == 'driver_assigned' || data['rider_name'] != null || data['driver_name'] != null || data['driver'] != null) {
-            final riderData = data['driver'] ?? data;
-            
-            final riderName = riderData['rider_name'] ?? riderData['driver_name'] ?? riderData['name'] ?? 'Unknown Rider';
-            final riderPhone = riderData['rider_phone'] ?? riderData['driver_phone'] ?? riderData['phone'] ?? 'N/A';
-            final vehicleNumber = riderData['vehicle_number'];
-            final vehicleModel = riderData['vehicle_model'];
-
-            _orderService.updatePacking(
-              orderId,
-              riderName: riderName,
-              riderPhone: riderPhone,
-              vehicleNumber: vehicleNumber,
-              vehicleModel: vehicleModel,
-            );
-            
-            try {
-              final existingOrder = state.activeOrders.firstWhere((o) => o.id == orderId);
-              final newRider = Rider(
-                id: riderData['rider_id'] ?? riderData['id'] ?? '',
-                name: riderName,
-                phone: riderPhone,
-                vehicleNumber: vehicleNumber,
-                vehicleModel: vehicleModel,
-              );
-              _updateActiveOrder(existingOrder.copyWith(rider: newRider));
-            } catch (e) {
-              if (kDebugMode) print("Order not found to update rider locally");
-            }
-            
-            if (!completer.isCompleted) completer.complete(true);
-          }
-        } catch (e) {
-          if (kDebugMode) print("Failed to decode tracking WS message: $e");
-        }
-      },
-      onError: (e) {
-        if (!completer.isCompleted) completer.completeError(e);
-      },
-      onDone: () {
-        if (!completer.isCompleted) completer.complete(false);
-      }
-    );
-
-    bool success = false;
-    try {
-      success = await completer.future.timeout(const Duration(minutes: 5));
-    } catch (e) {
-      if (kDebugMode) print("Fetching rider timed out or failed: $e");
-    } finally {
-      sub.cancel();
-      channel.sink.close();
-      
-      final nextFetching = Set<String>.from(state.fetchingRidersFor)..remove(orderId);
-      final nextFetched = Set<String>.from(state.ridersFetchedFor);
-      if (success) {
-        nextFetched.add(orderId);
-      }
-      state = state.copyWith(fetchingRidersFor: nextFetching, ridersFetchedFor: nextFetched);
-    }
-    return success;
   }
 
   @override

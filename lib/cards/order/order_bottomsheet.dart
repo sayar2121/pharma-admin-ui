@@ -305,8 +305,17 @@ class OrderBottomSheet extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: currentOrder.status == 'accepted'
-                  ? SizedBox(
+              child: Builder(
+                builder: (context) {
+                  final isFetching = orderState.fetchingRidersFor.contains(currentOrder.id);
+                  final hasFetched = orderState.ridersFetchedFor.contains(currentOrder.id);
+
+                  if (isFetching) {
+                    return const SearchingRiderWidget();
+                  }
+
+                  if (currentOrder.status == 'accepted') {
+                    return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: orderState.isRequestingRider
@@ -342,52 +351,30 @@ class OrderBottomSheet extends ConsumerWidget {
                               ),
                       ),
                     )
-                  : Builder(
-                      builder: (context) {
-                        final isFetching = orderState.fetchingRidersFor
-                            .contains(currentOrder.id);
-                        final hasFetched = orderState.ridersFetchedFor.contains(
-                          currentOrder.id,
-                        );
-
-                        if (isFetching) {
-                          return const SearchingRiderWidget();
-                        }
-
-                        return SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: hasFetched
-                                ? null
-                                : () async {
-                                    await ref
-                                        .read(orderProvider.notifier)
-                                        .fetchAndInformCustomer(
-                                          currentOrder.id,
-                                        );
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: hasFetched
-                                  ? AppColors.textTertiary
-                                  : AppColors.success,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: Text(
-                              hasFetched
-                                  ? 'Rider Assigned'
-                                  : 'Inform Customer',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                  : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ref
+                              .read(orderProvider.notifier)
+                              .informCustomer(currentOrder.id);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        );
-                      },
+                        ),
+                        child: const Text(
+                          'Inform Customer & Request Rider',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
             ),
         ],

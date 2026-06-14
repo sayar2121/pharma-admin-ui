@@ -22,6 +22,7 @@ class ProfileOptionsCard extends StatelessWidget {
           ),
         ),
         Container(
+          clipBehavior: Clip.antiAlias,
           decoration: AppCardStyles.sleekCard.copyWith(
             borderRadius: BorderRadius.circular(28),
           ),
@@ -73,35 +74,38 @@ class ProfileOptionsCard extends StatelessWidget {
   }) {
     return Column(
       children: [
-        ListTile(
-          onTap: onTap,
-          contentPadding: const EdgeInsets.all(16),
-          leading: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withAlpha(20),
-              borderRadius: BorderRadius.circular(16),
+        Material(
+          color: Colors.transparent,
+          child: ListTile(
+            onTap: onTap,
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withAlpha(20),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color, size: 24),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          title: Text(
-            title,
-            style: AppTextStyles.cardTitle.copyWith(fontSize: 16),
-          ),
-          subtitle: Text(
-            subtitle,
-            style: AppTextStyles.caption.copyWith(fontSize: 12),
-          ),
-          trailing: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              shape: BoxShape.circle,
+            title: Text(
+              title,
+              style: AppTextStyles.cardTitle.copyWith(fontSize: 16),
             ),
-            child: const Icon(
-              Iconsax.arrow_right_3,
-              size: 16,
-              color: AppColors.textTertiary,
+            subtitle: Text(
+              subtitle,
+              style: AppTextStyles.caption.copyWith(fontSize: 12),
+            ),
+            trailing: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Iconsax.arrow_right_3,
+                size: 16,
+                color: AppColors.textTertiary,
+              ),
             ),
           ),
         ),

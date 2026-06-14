@@ -165,10 +165,19 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     final List<dynamic> itemsData = json['items'] ?? [];
     
-    // Check if rider details exist
+    // Robustly check if rider/driver details exist
     Rider? riderDetails;
-    if (json['rider_name'] != null && json['rider_name'].toString().isNotEmpty) {
-      riderDetails = Rider.fromJson(json);
+    final riderData = json['rider'] ?? json['driver'] ?? json;
+    final rName = riderData['assigned_driver_name'] ?? riderData['rider_name'] ?? riderData['driver_name'] ?? riderData['name'];
+    
+    if (rName != null && rName.toString().isNotEmpty && json['order_type'] != 'cart') { // Cart orders usually don't have riders in the same way, but just in case
+      riderDetails = Rider(
+        id: (riderData['assigned_driver_id'] ?? riderData['rider_id'] ?? riderData['driver_id'] ?? riderData['id'] ?? '').toString(),
+        name: rName.toString(),
+        phone: (riderData['assigned_driver_phone'] ?? riderData['rider_phone'] ?? riderData['driver_phone'] ?? riderData['phone'] ?? '').toString(),
+        vehicleNumber: riderData['vehicle_number']?.toString(),
+        vehicleModel: riderData['vehicle_model']?.toString(),
+      );
     }
 
     final double totalBill = (json['total_bill_amount'] ?? 0.0).toDouble();
