@@ -1,13 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+
 import '../models/order.dart';
 import '../models/request_rider_order.dart';
 import '../models/user.dart';
 import '../services/order_services.dart';
-import '../services/api_url.dart';
+
 
 class OrderState {
   final bool isOnline;
@@ -161,17 +161,17 @@ class OrderNotifier extends StateNotifier<OrderState> {
 
   void ensureConnectedAndFetch() {
     if (_shopId == null) return;
+    if (!state.isOnline) return;
+
     if (!_orderService.isConnected) {
       _orderService.connect(_shopId);
     }
     _orderService.getShopOrders(1);
-    if (!state.isOnline) {
-      state = state.copyWith(isOnline: true);
-    }
+    _orderService.getBroadcastOrders();
   }
 
-  void acceptOrder(String orderId) {
-    _orderService.acceptOrder(orderId);
+  void acceptOrder(String orderId, {List<Map<String, dynamic>>? items, double? itemTotal}) {
+    _orderService.acceptOrder(orderId, items: items, itemTotal: itemTotal);
   }
 
   void rejectOrder(String orderId) {
@@ -215,8 +215,8 @@ class OrderNotifier extends StateNotifier<OrderState> {
     state = state.copyWith(isRequestingRider: true, requestError: null);
     try {
       final request = RequestRiderOrder(
-        orderType: 'medicine',
-        vehicleType: 'medicine_bike',
+        orderType: 'parcel',
+        vehicleType: 'bike',
         pickupAddress: user.shopAddress,
         pickupLat: pickupLat,
         pickupLng: pickupLng,
@@ -237,7 +237,16 @@ class OrderNotifier extends StateNotifier<OrderState> {
 
       final response = await _orderService.createCustomerOrder(request);
       final isOk = response.statusCode == 200 || response.statusCode == 201;
-      state = state.copyWith(isRequestingRider: false);
+      
+      Set<String> newFetching = state.fetchingRidersFor;
+      if (isOk) {
+        newFetching = Set<String>.from(state.fetchingRidersFor)..add(order.id);
+      }
+      
+      state = state.copyWith(
+        isRequestingRider: false,
+        fetchingRidersFor: newFetching,
+      );
       return isOk;
     } catch (e) {
       state = state.copyWith(

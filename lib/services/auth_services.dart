@@ -43,6 +43,13 @@ class AuthService {
         'pan_card_upload': 'pan_card',
         'registration_certificate_upload': 'registration_certificate',
         'shop_photo': 'shop_photo',
+        'gst_certificate_upload': 'gst_certificate',
+        'trade_license_upload': 'trade_license',
+        'aadhaar_card_upload': 'aadhaar_card',
+        'pharmacist_reg_upload': 'pharmacist_reg',
+        'bank_document_upload': 'bank_document',
+        'address_proof_upload': 'address_proof',
+        'owner_photo': 'owner_photo',
       };
 
       for (var entry in userMap.entries) {
@@ -81,6 +88,13 @@ class AuthService {
         'pan_card_upload': 'pan_card',
         'registration_certificate_upload': 'registration_certificate',
         'shop_photo': 'shop_photo',
+        'gst_certificate_upload': 'gst_certificate',
+        'trade_license_upload': 'trade_license',
+        'aadhaar_card_upload': 'aadhaar_card',
+        'pharmacist_reg_upload': 'pharmacist_reg',
+        'bank_document_upload': 'bank_document',
+        'address_proof_upload': 'address_proof',
+        'owner_photo': 'owner_photo',
       };
 
       for (var entry in userMap.entries) {
@@ -89,9 +103,15 @@ class AuthService {
 
         if (value != null && value is String && value.isNotEmpty) {
           if (fileFieldMapping.containsKey(key)) {
-            // Only upload if it's a local path (starts with / or has picker in name)
-            if (!kIsWeb && (value.startsWith('/') || value.contains('picker')) && File(value).existsSync()) {
-              formMap[fileFieldMapping[key]!] = await MultipartFile.fromFile(value);
+            // Upload if it's not a web URL or an existing backend URL
+            if (!kIsWeb && !value.contains('uploads/pharma_shop') && !value.contains('skipped_for_web_testing')) {
+              try {
+                formMap[fileFieldMapping[key]!] = await MultipartFile.fromFile(value);
+              } catch (e) {
+                if (kDebugMode) {
+                  print("Failed to attach file $value: $e");
+                }
+              }
             }
           } else {
             formMap[key] = value;

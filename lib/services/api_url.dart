@@ -1,8 +1,8 @@
 class ApiUrl {
   static const String baseUrl =
-      "http://10.0.2.2:8000"; // Replace with your actual backend URL
+      "http://192.168.0.224:8000"; // Replace with your actual backend URL
   static const String wsBaseUrl =
-      "ws://10.0.2.2:8000"; // Replace with your actual WebSocket URL
+      "ws://192.168.0.224:8000"; // Replace with your actual WebSocket URL
 
   // Pharma Shop Authentication and Profile Endpoints
   static const String signup = "$baseUrl/auth/pharma-shop/signup";
@@ -45,5 +45,6 @@ class ApiUrl {
   static const String getPrivacyPoliciesAll = "$privacyPolicies/get-all";
 
     // Rider Order Request Endpoint
-    static const String createCustomerOrder = "http://192.168.0.222:8000/customer_orders/create";
+    static const String caby24BaseUrl = "http://192.168.0.224:8019";
+    static const String createCustomerOrder = "$caby24BaseUrl/customer_orders/create";
 }

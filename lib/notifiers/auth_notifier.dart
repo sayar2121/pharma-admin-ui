@@ -39,6 +39,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     return false;
   }
 
+  Future<void> updateUser(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_data', user.toJson());
+    state = state.copyWith(user: user);
+  }
+
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     try {

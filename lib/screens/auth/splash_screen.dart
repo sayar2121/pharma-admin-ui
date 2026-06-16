@@ -40,7 +40,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
         final isLoggedIn = await ref.read(authProvider.notifier).checkLoginStatus();
         if (mounted) {
           if (isLoggedIn) {
-            context.go('/profile');
+            context.go('/dashboard');
           } else {
             context.go('/login');
           }
@@ -107,23 +107,35 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'PHARMA CONNECT',
-                      style: AppTextStyles.header,
+                    Text(
+                      'Medy24 Pharma',
+                      style: AppTextStyles.header.copyWith(
+                        color: AppColors.primaryAccent,
+                        fontSize: 34,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Your Trusted Medical Partner',
+                      'Pharmacy Partner App',
                       style: AppTextStyles.tagline.copyWith(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 48),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildAnimatedIcon(Iconsax.mask, 0),
+                        _buildAnimatedIcon(Iconsax.health, 0),
                         const SizedBox(width: 24),
-                        _buildAnimatedIcon(Iconsax.microscope, 1),
+                        _buildAnimatedIcon(Iconsax.shop, 1),
                       ],
+                    ),
+                    const SizedBox(height: 48),
+                    const SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 ),

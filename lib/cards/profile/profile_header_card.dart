@@ -86,10 +86,23 @@ class ProfileHeaderCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(60),
         shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          )
+        ],
       ),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
       child: Container(
         width: 80,
         height: 80,
@@ -106,6 +119,7 @@ class ProfileHeaderCard extends StatelessWidget {
         child: imageProvider == null
             ? const Icon(Iconsax.shop, color: AppColors.primary, size: 36)
             : null,
+      ),
       ),
     );
   }

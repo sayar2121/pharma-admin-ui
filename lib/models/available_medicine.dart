@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class AvailableMedicine {
   final String? medicineId;
   final String medicineName;
@@ -37,12 +39,10 @@ class AvailableMedicine {
       medicineName: json['medicine_name'] ?? '',
       medicineCategory: json['medicine_category'] ?? '',
       medicinePhoto: json['medicine_photo'],
-      medicineQuantity: json['medicine_quantity'] ?? '',
+      medicineQuantity: json['medicine_quantity']?.toString() ?? '',
       medicineDescription: json['medicine_description'],
       medicineComposition: json['medicine_composition'],
-      precautions: json['precautions'] != null 
-          ? List<String>.from(json['precautions'].map((x) => x.toString())) 
-          : null,
+      precautions: _parsePrecautions(json['precautions']),
       mrp: json['mrp'] != null ? (double.tryParse(json['mrp'].toString()) ?? 0.0) : 0.0,
       discountPercent: json['discount_percent'] != null ? double.tryParse(json['discount_percent'].toString()) : null,
       finalSellingPrice: json['final_selling_price'] != null ? double.tryParse(json['final_selling_price'].toString()) : null,
@@ -73,5 +73,26 @@ class AvailableMedicine {
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
+  }
+
+  static List<String>? _parsePrecautions(dynamic data) {
+    if (data == null) return null;
+    if (data is List) {
+      return data.map((e) => e.toString()).toList();
+    }
+    if (data is String) {
+      if (data.isEmpty) return null;
+      try {
+        final decoded = jsonDecode(data);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString()).toList();
+        }
+      } catch (_) {
+        // Not a valid JSON array, maybe a comma separated string?
+        return data.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      }
+    }
+    // If it's a Map or some other unexpected format, just try converting the whole thing to string or ignore
+    return null; 
   }
 }

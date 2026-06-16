@@ -4,18 +4,19 @@ import 'package:iconsax/iconsax.dart';
 import '../../models/order.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_url.dart';
-import '../../routes/app_router.dart';
 
 class OrderPopup extends StatelessWidget {
   final Order order;
-  final VoidCallback onAccept;
+  final Function(List<Map<String, dynamic>>? items, double? itemTotal) onAccept;
   final VoidCallback onReject;
+  final Function(String, bool)? onPreviewImage;
 
   const OrderPopup({
     super.key,
     required this.order,
     required this.onAccept,
     required this.onReject,
+    this.onPreviewImage,
   });
 
   @override
@@ -249,10 +250,9 @@ class OrderPopup extends StatelessWidget {
                                         : '${ApiUrl.baseUrl}/${order.prescriptionImage!.startsWith('/') ? order.prescriptionImage!.substring(1) : order.prescriptionImage!}');
                               return GestureDetector(
                                 onTap: () {
-                                  appRouter.push(
-                                    '/prescription-preview',
-                                    extra: imageUrl,
-                                  );
+                                  if (onPreviewImage != null) {
+                                    onPreviewImage!(imageUrl, isBase64);
+                                  }
                                 },
                                 child: Container(
                                   margin: const EdgeInsets.only(
@@ -439,7 +439,7 @@ class OrderPopup extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: onAccept,
+                          onPressed: () => onAccept(null, null),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.success,
                             foregroundColor: Colors.white,

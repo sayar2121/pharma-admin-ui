@@ -7,6 +7,7 @@ import '../../cards/order/order_bottomsheet.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/side_nav_bar.dart';
 import '../../widgets/app_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class OrderManagementScreen extends ConsumerStatefulWidget {
   const OrderManagementScreen({super.key});
@@ -30,8 +31,14 @@ class _OrderManagementScreenState
   Widget build(BuildContext context) {
     final activeOrders = ref.watch(orderProvider).activeOrders;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.go('/dashboard');
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Order Management',
         subtitle: 'Manage incoming and active orders',
@@ -70,6 +77,6 @@ class _OrderManagementScreenState
                 );
               },
             ),
-    );
+    ));
   }
 }

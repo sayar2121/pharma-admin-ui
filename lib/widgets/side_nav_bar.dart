@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import '../theme/app_theme.dart';
 import '../providers/order_provider.dart';
+import '../providers/auth_provider.dart';
 
 class SideNavBar extends ConsumerStatefulWidget {
   final int selectedIndex;
@@ -75,7 +76,7 @@ class _SideNavBarState extends ConsumerState<SideNavBar> {
                     4,
                     'Payments & Earnings',
                     Iconsax.wallet,
-                    '/dashboard',
+                    '/earnings',
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -248,18 +249,22 @@ class _SideNavBarState extends ConsumerState<SideNavBar> {
                 size: 22,
               ),
               const SizedBox(width: 16),
-              Text(
-                title,
-                style: AppTextStyles.description.copyWith(
-                  fontSize: 15,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.textSecondary,
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.description.copyWith(
+                    fontSize: 15,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
               if (isSelected) ...[
-                const Spacer(),
+                const SizedBox(width: 8),
                 Container(
                   width: 6,
                   height: 6,
@@ -277,6 +282,9 @@ class _SideNavBarState extends ConsumerState<SideNavBar> {
   }
 
   Widget _buildFooter() {
+    final authState = ref.watch(authProvider);
+    final shopName = authState.user?.shopName ?? 'Loading...';
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -296,25 +304,31 @@ class _SideNavBarState extends ConsumerState<SideNavBar> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Alex Medy',
-                  style: TextStyle(
+                  shopName,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                Text('Store Owner', style: AppTextStyles.caption),
+                const Text('Store Owner', style: AppTextStyles.caption),
               ],
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                // ignore: use_build_context_synchronously
+                context.go('/login');
+              }
+            },
             icon: const Icon(Iconsax.logout, size: 20, color: AppColors.error),
           ),
         ],

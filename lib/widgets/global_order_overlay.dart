@@ -1,17 +1,29 @@
 import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/order_provider.dart';
 import 'order_popup.dart';
+import 'bill_generation_dialog.dart';
+import '../models/order.dart';
 import '../routes/app_router.dart';
 
-class GlobalOrderOverlay extends ConsumerWidget {
+class GlobalOrderOverlay extends ConsumerStatefulWidget {
   final Widget child;
 
   const GlobalOrderOverlay({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GlobalOrderOverlay> createState() => _GlobalOrderOverlayState();
+}
+
+class _GlobalOrderOverlayState extends ConsumerState<GlobalOrderOverlay> {
+  String? _previewImageUrl;
+  bool _isPreviewBase64 = false;
+  Order? _billGenerationOrder;
+
+  @override
+  Widget build(BuildContext context) {
     final orderState = ref.watch(orderProvider);
     
     // Check if we have incoming orders
@@ -32,7 +44,7 @@ class GlobalOrderOverlay extends ConsumerWidget {
 
     return Stack(
       children: [
-        child,
+        widget.child,
         if (shouldShowPopup)
           Positioned.fill(
             child: TweenAnimationBuilder<double>(
@@ -69,15 +81,99 @@ class GlobalOrderOverlay extends ConsumerWidget {
                     final order = orderState.incomingOrders[index];
                     return OrderPopup(
                       order: order,
-                      onAccept: () {
-                        ref.read(orderProvider.notifier).acceptOrder(order.id);
+                      onAccept: (items, itemTotal) {
+                        if (order.type == 'prescription') {
+                          setState(() {
+                            _billGenerationOrder = order;
+                          });
+                        } else {
+                          ref.read(orderProvider.notifier).acceptOrder(
+                            order.id,
+                            items: items,
+                            itemTotal: itemTotal,
+                          );
+                        }
                       },
                       onReject: () {
                         ref.read(orderProvider.notifier).rejectOrder(order.id);
                       },
+                      onPreviewImage: (url, isBase64) {
+                        setState(() {
+                          _previewImageUrl = url;
+                          _isPreviewBase64 = isBase64;
+                        });
+                      },
                     );
                   },
                 ),
+              ),
+            ),
+          ),
+          
+        if (_previewImageUrl != null)
+          Positioned.fill(
+            child: Material(
+              color: Colors.black87,
+              child: Stack(
+                children: [
+                  Center(
+                    child: InteractiveViewer(
+                      minScale: 0.5,
+                      maxScale: 4.0,
+                      child: _isPreviewBase64
+                          ? Image.memory(
+                              base64Decode(_previewImageUrl!.split(',').last),
+                              fit: BoxFit.contain,
+                            )
+                          : Image.network(
+                              _previewImageUrl!,
+                              fit: BoxFit.contain,
+                            ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 40,
+                    right: 20,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () {
+                          setState(() {
+                            _previewImageUrl = null;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+        if (_billGenerationOrder != null)
+          Positioned.fill(
+            child: Material(
+              color: Colors.black54,
+              child: BillGenerationDialog(
+                onSubmit: (items, itemTotal) {
+                  ref.read(orderProvider.notifier).acceptOrder(
+                    _billGenerationOrder!.id,
+                    items: items,
+                    itemTotal: itemTotal,
+                  );
+                  setState(() {
+                    _billGenerationOrder = null;
+                  });
+                },
+                onCancel: () {
+                  setState(() {
+                    _billGenerationOrder = null;
+                  });
+                },
               ),
             ),
           ),

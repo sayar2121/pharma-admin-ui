@@ -26,22 +26,28 @@ class CompanyHeaderCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          if (aboutUs.companyPhoto != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                ApiUrl.imageUrl(aboutUs.companyPhoto!),
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 120,
-                  height: 120,
-                  color: AppColors.primary.withAlpha(50),
-                  child: const Icon(Icons.business, size: 60, color: AppColors.primary),
-                ),
-              ),
-            ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: aboutUs.companyPhoto != null
+                ? Image.network(
+                    ApiUrl.imageUrl(aboutUs.companyPhoto!),
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
+                      'assets/logo/naiyo_black_nobg.png',
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                : Image.asset(
+                    'assets/logo/naiyo_black_nobg.png',
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.contain,
+                  ),
+          ),
           const SizedBox(height: 16),
           Text(
             aboutUs.companyName,

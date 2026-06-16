@@ -141,6 +141,8 @@ class Order {
   final String? prescriptionImage;
   final String status; // 'broadcast', 'accepted', 'packing', 'out_for_delivery', 'delivered', 'cancelled'
   final String? paymentMethod;
+  final String? pickupOtp;
+  final String? dropOtp;
   final Customer customer;
   final Rider? rider;
   final DateTime createdAt;
@@ -157,6 +159,8 @@ class Order {
     this.prescriptionImage,
     required this.status,
     this.paymentMethod,
+    this.pickupOtp,
+    this.dropOtp,
     required this.customer,
     this.rider,
     required this.createdAt,
@@ -198,6 +202,8 @@ class Order {
       prescriptionImage: json['prescription_url'],
       status: json['order_status'] ?? 'broadcast',
       paymentMethod: json['payment_method'],
+      pickupOtp: json['pickup_otp']?.toString(),
+      dropOtp: json['drop_otp']?.toString(),
       customer: Customer.fromJson(json),
       rider: riderDetails,
       createdAt: json['created_at'] != null 
@@ -218,6 +224,8 @@ class Order {
       'prescription_url': prescriptionImage,
       'order_status': status,
       'payment_method': paymentMethod,
+      'pickup_otp': pickupOtp,
+      'drop_otp': dropOtp,
       'created_at': createdAt.toIso8601String(),
       ...customer.toJson(),
       if (rider != null) ...rider!.toJson(),
@@ -228,6 +236,8 @@ class Order {
     String? status,
     Rider? rider,
     String? paymentMethod,
+    String? pickupOtp,
+    String? dropOtp,
   }) {
     return Order(
       id: id,
@@ -241,6 +251,8 @@ class Order {
       prescriptionImage: prescriptionImage,
       status: status ?? this.status,
       paymentMethod: paymentMethod ?? this.paymentMethod,
+      pickupOtp: pickupOtp ?? this.pickupOtp,
+      dropOtp: dropOtp ?? this.dropOtp,
       customer: customer,
       rider: rider ?? this.rider,
       createdAt: createdAt,

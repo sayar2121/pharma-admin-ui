@@ -83,8 +83,16 @@ class OrderService {
     }
   }
 
-  void acceptOrder(String orderId) {
-    _send({"type": "accept_order", "order_id": orderId});
+  void acceptOrder(String orderId, {List<Map<String, dynamic>>? items, double? itemTotal}) {
+    final payload = <String, dynamic>{
+      "type": "accept_order",
+      "order_id": orderId,
+    };
+    if (items != null) {
+      payload["items"] = items;
+      payload["item_total"] = itemTotal;
+    }
+    _send(payload);
   }
 
   void updatePacking(
@@ -123,6 +131,10 @@ class OrderService {
       "status": status,
     };
     _send(payload);
+  }
+
+  void getBroadcastOrders() {
+    _send({"type": "get_broadcast_orders"});
   }
 
   Future<Response> createCustomerOrder(RequestRiderOrder request) async {

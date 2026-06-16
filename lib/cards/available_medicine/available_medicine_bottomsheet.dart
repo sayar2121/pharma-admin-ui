@@ -65,26 +65,23 @@ class AvailableMedicineBottomSheet extends StatelessWidget {
                         color: AppColors.background,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: AppColors.divider),
-                        image:
-                            medicine.medicinePhoto != null &&
-                                medicine.medicinePhoto!.isNotEmpty
-                            ? DecorationImage(
-                                image: NetworkImage(
-                                  "${ApiUrl.baseUrl}/${medicine.medicinePhoto}",
-                                ),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                       ),
-                      child:
-                          medicine.medicinePhoto == null ||
-                              medicine.medicinePhoto!.isEmpty
-                          ? const Icon(
+                      clipBehavior: Clip.antiAlias,
+                      child: medicine.medicinePhoto != null && medicine.medicinePhoto!.isNotEmpty
+                          ? Image.network(
+                              "${ApiUrl.baseUrl}/${medicine.medicinePhoto}",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Iconsax.health,
+                                color: AppColors.primary,
+                                size: 40,
+                              ),
+                            )
+                          : const Icon(
                               Iconsax.health,
                               color: AppColors.primary,
                               size: 40,
-                            )
-                          : null,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 20),

@@ -7,7 +7,6 @@ import '../../cards/about_us/company_header_card.dart';
 import '../../cards/about_us/company_description_card.dart';
 import '../../cards/about_us/mission_vision_card.dart';
 import '../../cards/about_us/director_message_card.dart';
-import '../../cards/about_us/partner_card.dart';
 import '../../cards/about_us/contact_card.dart';
 
 class AboutUsScreen extends ConsumerWidget {
@@ -49,8 +48,6 @@ class AboutUsScreen extends ConsumerWidget {
                     DirectorMessageCard(
                       aboutUs: aboutUsState.aboutUsList.first,
                     ),
-                    const SizedBox(height: 16),
-                    PartnerCard(aboutUs: aboutUsState.aboutUsList.first),
                     const SizedBox(height: 16),
                     ContactCard(aboutUs: aboutUsState.aboutUsList.first),
                     const SizedBox(height: 32),

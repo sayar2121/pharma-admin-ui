@@ -6,7 +6,7 @@ import '../../providers/order_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_url.dart';
 import '../../routes/app_router.dart';
-import '../../widgets/searching_rider_widget.dart';
+import 'assign_rider_bottomsheet.dart';
 
 class OrderBottomSheet extends ConsumerWidget {
   final Order order;
@@ -99,44 +99,6 @@ class OrderBottomSheet extends ConsumerWidget {
                     child: Divider(color: AppColors.divider, height: 1),
                   ),
 
-                  // Customer Details
-                  _buildSectionTitle(
-                    Iconsax.profile_circle,
-                    'Customer Information',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    Iconsax.user,
-                    currentOrder.customer.name,
-                    isBold: true,
-                  ),
-                  _buildInfoRow(Iconsax.call, currentOrder.customer.phone),
-                  if (currentOrder.customer.address != null)
-                    _buildInfoRow(
-                      Iconsax.location,
-                      currentOrder.customer.address!,
-                    ),
-
-                  if (currentOrder.rider != null) ...[
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Divider(color: AppColors.divider, height: 1),
-                    ),
-                    _buildSectionTitle(Iconsax.driver, 'Delivery Rider'),
-                    const SizedBox(height: 16),
-                    _buildInfoRow(
-                      Iconsax.user,
-                      currentOrder.rider!.name,
-                      isBold: true,
-                    ),
-                    _buildInfoRow(Iconsax.call, currentOrder.rider!.phone),
-                  ],
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Divider(color: AppColors.divider, height: 1),
-                  ),
-
                   if (currentOrder.type == 'prescription' &&
                       currentOrder.prescriptionImage != null &&
                       currentOrder.prescriptionImage!.isNotEmpty) ...[
@@ -190,6 +152,94 @@ class OrderBottomSheet extends ConsumerWidget {
                       },
                     ),
                   ],
+
+                  // Customer Details
+                  _buildSectionTitle(
+                    Iconsax.profile_circle,
+                    'Customer Information',
+                  ),
+                  const SizedBox(height: 16),
+                  _buildInfoRow(
+                    Iconsax.user,
+                    currentOrder.customer.name,
+                    isBold: true,
+                  ),
+                  _buildInfoRow(Iconsax.call, currentOrder.customer.phone),
+                  if (currentOrder.customer.address != null)
+                    _buildInfoRow(
+                      Iconsax.location,
+                      currentOrder.customer.address!,
+                    ),
+
+                  if (currentOrder.rider != null) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: Divider(color: AppColors.divider, height: 1),
+                    ),
+                    _buildSectionTitle(Iconsax.driver, 'Delivery Rider'),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withAlpha(10),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.primary.withAlpha(30)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow(
+                            Iconsax.user,
+                            currentOrder.rider!.name,
+                            isBold: true,
+                          ),
+                          _buildInfoRow(Iconsax.call, currentOrder.rider!.phone),
+                          if (currentOrder.rider!.vehicleNumber != null)
+                            _buildInfoRow(Iconsax.car, currentOrder.rider!.vehicleNumber!),
+                          if (currentOrder.pickupOtp != null) ...[
+                            const SizedBox(height: 12),
+                            const Divider(color: AppColors.divider),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Pickup OTP',
+                                  style: AppTextStyles.description.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    currentOrder.pickupOtp!,
+                                    style: AppTextStyles.cardTitle.copyWith(
+                                      color: Colors.white,
+                                      letterSpacing: 4,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Share this OTP with the rider when handing over the package.',
+                              style: AppTextStyles.caption.copyWith(color: AppColors.primaryAccent),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+
+
 
                   // Medicines
                   _buildSectionTitle(Iconsax.box, 'Medicines'),
@@ -307,24 +357,16 @@ class OrderBottomSheet extends ConsumerWidget {
               ),
               child: Builder(
                 builder: (context) {
-                  final isFetching = orderState.fetchingRidersFor.contains(currentOrder.id);
-                  final hasFetched = orderState.ridersFetchedFor.contains(currentOrder.id);
-
-                  if (isFetching) {
-                    return const SearchingRiderWidget();
-                  }
+                  orderState.fetchingRidersFor.contains(currentOrder.id);
 
                   if (currentOrder.status == 'accepted') {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: orderState.isRequestingRider
-                            ? null
-                            : () async {
-                                await ref
-                                    .read(orderProvider.notifier)
-                                    .requestRiderForOrder(currentOrder);
-                              },
+                        onPressed: () {
+                           Navigator.pop(context);
+                           AssignRiderBottomSheet.show(context, currentOrder);
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -333,25 +375,17 @@ class OrderBottomSheet extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: orderState.isRequestingRider
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Mark Ready for Delivery',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                        child: const Text(
+                          'Mark Ready for Delivery',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    )
-                  : SizedBox(
+                    );
+                  } else {
+                    return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
@@ -375,7 +409,10 @@ class OrderBottomSheet extends ConsumerWidget {
                           ),
                         ),
                       ),
-                    ),
+                    );
+                  }
+                },
+              ),
             ),
         ],
       ),

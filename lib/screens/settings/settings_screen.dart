@@ -15,8 +15,14 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.go('/dashboard');
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
       drawer: SideNavBar(
         selectedIndex: 6, // Index for Settings
         onItemSelected: (index) {},
@@ -54,17 +60,17 @@ class SettingsScreen extends ConsumerWidget {
                   SettingsCard(
                     title: 'Give Feedback',
                     icon: Iconsax.message_edit,
-                    onTap: () {},
+                    onTap: () => context.push('/feedback'),
                   ),
                   SettingsCard(
                     title: 'Report a Problem',
                     icon: Iconsax.danger,
-                    onTap: () {},
+                    onTap: () => context.push('/report-problem'),
                   ),
                   SettingsCard(
                     title: 'Help Center',
                     icon: Iconsax.support,
-                    onTap: () {},
+                    onTap: () => _showHelpCenterBottomSheet(context),
                   ),
                   const SizedBox(height: 24),
                   _buildSectionTitle('Account Action'),
@@ -79,7 +85,7 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
-    );
+    ));
   }
 
   Widget _buildSectionTitle(String title) {
@@ -117,6 +123,135 @@ class SettingsScreen extends ConsumerWidget {
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpCenterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        padding: const EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 12,
+          bottom: 32,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Help Center',
+              style: AppTextStyles.header,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Contact us for any support or inquiries. We are available 24/7.',
+              style: AppTextStyles.description,
+            ),
+            const SizedBox(height: 24),
+            _buildContactRow(
+              Iconsax.call,
+              'Call Us',
+              '+91 8000000000',
+              AppColors.primary,
+            ),
+            const SizedBox(height: 16),
+            _buildContactRow(
+              Iconsax.sms,
+              'Email Us',
+              'support@medy24.com',
+              AppColors.secondary,
+            ),
+            const SizedBox(height: 16),
+            _buildContactRow(
+              Iconsax.location,
+              'Headquarters',
+              'Naiyo24 PVT LTD, Tech Park',
+              AppColors.success,
+            ),
+            const SizedBox(height: 16),
+            _buildContactRow(
+              Iconsax.global,
+              'Website',
+              'www.naiyo24.com',
+              AppColors.starYellow,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContactRow(IconData icon, String title, String detail, Color iconColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider.withAlpha(128)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconColor.withAlpha(20),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.description.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  detail,
+                  style: AppTextStyles.cardTitle.copyWith(fontSize: 15),
+                ),
+              ],
+            ),
           ),
         ],
       ),

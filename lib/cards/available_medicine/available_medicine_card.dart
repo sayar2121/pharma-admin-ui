@@ -32,16 +32,19 @@ class AvailableMedicineCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(16),
-                image: medicine.medicinePhoto != null && medicine.medicinePhoto!.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage("${ApiUrl.baseUrl}/${medicine.medicinePhoto}"),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: medicine.medicinePhoto == null || medicine.medicinePhoto!.isEmpty
-                  ? const Icon(Iconsax.health, color: AppColors.primary, size: 32)
-                  : null,
+              clipBehavior: Clip.antiAlias,
+              child: medicine.medicinePhoto != null && medicine.medicinePhoto!.isNotEmpty
+                  ? Image.network(
+                      "${ApiUrl.baseUrl}/${medicine.medicinePhoto}",
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Iconsax.health,
+                        color: AppColors.primary,
+                        size: 32,
+                      ),
+                    )
+                  : const Icon(Iconsax.health, color: AppColors.primary, size: 32),
             ),
             const SizedBox(width: 16),
             // Details

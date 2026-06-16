@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../cards/profile/profile_header_card.dart';
 import '../../cards/profile/profile_options_card.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -15,8 +16,14 @@ class ProfileScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState.user;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.go('/dashboard');
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'My Profile',
         subtitle: 'Manage your pharmacy account',
@@ -24,10 +31,7 @@ class ProfileScreen extends ConsumerWidget {
       ),
       drawer: SideNavBar(
         selectedIndex: 5, // Profile index
-        onItemSelected: (index) {
-          Navigator.pop(context);
-          // Handle navigation based on index
-        },
+        onItemSelected: (index) {},
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.screenPadding),
@@ -40,6 +44,6 @@ class ProfileScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

@@ -7,6 +7,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/side_nav_bar.dart';
 import '../../cards/available_medicine/available_medicine_card.dart';
 import '../../cards/available_medicine/available_medicine_bottomsheet.dart';
+import 'package:go_router/go_router.dart';
 
 class AvailableMedicineScreen extends ConsumerStatefulWidget {
   const AvailableMedicineScreen({super.key});
@@ -49,8 +50,14 @@ class _AvailableMedicineScreenState extends ConsumerState<AvailableMedicineScree
   Widget build(BuildContext context) {
     final medicineState = ref.watch(medicineProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.go('/dashboard');
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
       drawer: SideNavBar(
         selectedIndex: 1,
         onItemSelected: (index) {
@@ -136,6 +143,6 @@ class _AvailableMedicineScreenState extends ConsumerState<AvailableMedicineScree
           ),
         ],
       ),
-    );
+    ));
   }
 }
