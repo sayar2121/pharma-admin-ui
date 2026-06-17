@@ -6,6 +6,7 @@ import '../../providers/order_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_url.dart';
 import '../../routes/app_router.dart';
+import '../../screens/order/components/generate_quote_dialog.dart';
 import 'assign_rider_bottomsheet.dart';
 
 class OrderBottomSheet extends ConsumerWidget {
@@ -342,6 +343,8 @@ class OrderBottomSheet extends ConsumerWidget {
 
           // Action Buttons
           if (currentOrder.status == 'accepted' ||
+              currentOrder.status == 'awaiting_customer_approval' ||
+              currentOrder.status == 'packing' ||
               currentOrder.status == 'out_for_delivery')
             Container(
               padding: const EdgeInsets.all(24),
@@ -359,24 +362,21 @@ class OrderBottomSheet extends ConsumerWidget {
                 builder: (context) {
                   orderState.fetchingRidersFor.contains(currentOrder.id);
 
-                  if (currentOrder.status == 'accepted') {
+                  if (currentOrder.status == 'awaiting_customer_approval') {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                           Navigator.pop(context);
-                           AssignRiderBottomSheet.show(context, currentOrder);
-                        },
+                        onPressed: null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.divider,
+                          foregroundColor: AppColors.textSecondary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                         child: const Text(
-                          'Mark Ready for Delivery',
+                          'Waiting for Customer Approval',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -384,6 +384,69 @@ class OrderBottomSheet extends ConsumerWidget {
                         ),
                       ),
                     );
+                  } else if (currentOrder.status == 'accepted' || currentOrder.status == 'packing') {
+                    if (currentOrder.status == 'accepted' && currentOrder.type == 'prescription' && (currentOrder.items.isEmpty || currentOrder.totalAmount == 0)) {
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                             showDialog(
+                               context: context,
+                               builder: (context) => GenerateQuoteDialog(
+                                 order: currentOrder,
+                                 onSubmit: (items, itemTotal) {
+                                   ref.read(orderProvider.notifier).submitPrescriptionQuote(
+                                     currentOrder.id,
+                                     items,
+                                     itemTotal,
+                                   );
+                                 },
+                               ),
+                             );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'Generate Bill for Customer',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                             Navigator.pop(context);
+                             AssignRiderBottomSheet.show(context, currentOrder);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'Mark Ready for Delivery',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                   } else {
                     return SizedBox(
                       width: double.infinity,
@@ -489,6 +552,9 @@ class OrderBottomSheet extends ConsumerWidget {
     if (status == 'packing' || status == 'ready_for_delivery') {
       bgColor = AppColors.warningLight;
       textColor = AppColors.warning;
+    } else if (status == 'awaiting_customer_approval') {
+      bgColor = AppColors.purple.withAlpha(20);
+      textColor = AppColors.purple;
     } else if (status == 'out_for_delivery' || status == 'delivered') {
       bgColor = AppColors.successLight;
       textColor = AppColors.success;

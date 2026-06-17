@@ -52,6 +52,7 @@ dependencies:
   intl: ^0.20.2
   http: ^1.6.0
   url_launcher: ^6.3.2
+  audioplayers: ^6.7.1
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,7 @@ flutter:
   assets:
     - assets/logo/
     - assets/logo/naiyo_black_nobg.png
+    - assets/audio/
 
   fonts:
     - family: Lexend

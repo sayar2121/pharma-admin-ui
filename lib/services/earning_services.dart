@@ -4,8 +4,8 @@ import '../models/earning.dart';
 import 'api_url.dart';
 
 class EarningService {
-  Future<List<EarningModel>> fetchEarnings(String shopId, {int page = 1, int limit = 50}) async {
-    final url = Uri.parse('${ApiUrl.baseUrl}/earnings/pharma-shop/get-all/$shopId?page=$page&limit=$limit');
+  Future<List<EarningModel>> fetchEarnings(String shopId, {int page = 1, int limit = 50, String period = 'all'}) async {
+    final url = Uri.parse('${ApiUrl.baseUrl}/earnings/pharma-shop/get-all/$shopId?page=$page&limit=$limit&period=$period');
     
     final response = await http.get(url);
     if (response.statusCode == 200) {
@@ -17,8 +17,8 @@ class EarningService {
     }
   }
 
-  Future<EarningSummary> fetchEarningSummary(String shopId) async {
-    final url = Uri.parse('${ApiUrl.baseUrl}/earnings/pharma-shop/summary/$shopId');
+  Future<EarningSummary> fetchEarningSummary(String shopId, {String period = 'all'}) async {
+    final url = Uri.parse('${ApiUrl.baseUrl}/earnings/pharma-shop/summary/$shopId?period=$period');
     
     final response = await http.get(url);
     if (response.statusCode == 200) {

@@ -9,12 +9,14 @@ class EarningState {
   final EarningSummary? summary;
   final bool isLoading;
   final String? error;
+  final String period;
 
   EarningState({
     this.earnings = const [],
     this.summary,
     this.isLoading = false,
     this.error,
+    this.period = 'all',
   });
 
   EarningState copyWith({
@@ -22,12 +24,14 @@ class EarningState {
     EarningSummary? summary,
     bool? isLoading,
     String? error,
+    String? period,
   }) {
     return EarningState(
       earnings: earnings ?? this.earnings,
       summary: summary ?? this.summary,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      period: period ?? this.period,
     );
   }
 }
@@ -46,6 +50,11 @@ class EarningNotifier extends StateNotifier<EarningState> {
     fetchEarningsData();
   }
 
+  void setPeriod(String period) {
+    state = state.copyWith(period: period);
+    fetchEarningsData();
+  }
+
   Future<void> fetchEarningsData() async {
     final shopId = _ref.read(authProvider).user?.shopId;
     if (shopId == null) {
@@ -56,8 +65,8 @@ class EarningNotifier extends StateNotifier<EarningState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final summary = await _service.fetchEarningSummary(shopId);
-      final earnings = await _service.fetchEarnings(shopId, limit: 100);
+      final summary = await _service.fetchEarningSummary(shopId, period: state.period);
+      final earnings = await _service.fetchEarnings(shopId, limit: 100, period: state.period);
 
       state = state.copyWith(
         summary: summary,

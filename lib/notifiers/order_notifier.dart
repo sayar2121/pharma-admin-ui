@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import '../models/order.dart';
 import '../models/request_rider_order.dart';
@@ -54,10 +55,11 @@ class OrderNotifier extends StateNotifier<OrderState> {
   final String? _shopId;
   final User? _user;
   StreamSubscription? _subscription;
-
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   OrderNotifier(this._orderService, this._shopId, this._user)
     : super(OrderState()) {
+    _audioPlayer.setReleaseMode(ReleaseMode.loop);
     _subscription = _orderService.messageStream.listen(_onMessage);
   }
 
@@ -69,6 +71,9 @@ class OrderNotifier extends StateNotifier<OrderState> {
         final order = Order.fromJson(data['order']);
         final newIncoming = List<Order>.from(state.incomingOrders)..add(order);
         state = state.copyWith(incomingOrders: newIncoming);
+        
+        // Play custom notification sound continuously
+        _audioPlayer.play(AssetSource('audio/order_ring.mp3'));
       } catch (e) {
         if (kDebugMode) {
           if (kDebugMode) {
@@ -79,13 +84,25 @@ class OrderNotifier extends StateNotifier<OrderState> {
     } else if (type == 'order_accepted' ||
         type == 'order_updated' ||
         type == 'order_status_updated' ||
-        type == 'order_status_update') {
+        type == 'order_status_update' ||
+        type == 'quote_submitted' ||
+        type == 'quote_approved_by_customer') {
       try {
         final order = Order.fromJson(data['order']);
         _updateActiveOrder(order);
       } catch (e) {
         if (kDebugMode) {
           print("Failed to parse updated order: \$e");
+        }
+      }
+    } else if (type == 'quote_rejected_by_customer') {
+      try {
+        final order = Order.fromJson(data['order']);
+        final newActive = state.activeOrders.where((o) => o.id != order.id).toList();
+        state = state.copyWith(activeOrders: newActive);
+      } catch (e) {
+        if (kDebugMode) {
+          print("Failed to remove rejected order: \$e");
         }
       }
     } else if (type == 'orders_list') {
@@ -104,12 +121,22 @@ class OrderNotifier extends StateNotifier<OrderState> {
         final ordersData = data['data'] as List;
         final orders = ordersData.map((e) => Order.fromJson(e)).toList();
         state = state.copyWith(incomingOrders: orders);
+        if (orders.isEmpty) {
+          _audioPlayer.stop();
+        }
       } catch (e, stacktrace) {
         if (kDebugMode) {
           print("Failed to parse broadcast orders list: $e");
           print("Stacktrace: $stacktrace");
           print("Raw Data: ${data['data']}");
         }
+      }
+    } else if (type == 'remove_broadcast_order') {
+      final orderId = data['order_id'];
+      final newIncoming = state.incomingOrders.where((o) => o.id != orderId).toList();
+      state = state.copyWith(incomingOrders: newIncoming);
+      if (newIncoming.isEmpty) {
+        _audioPlayer.stop();
       }
     }
   }
@@ -171,10 +198,16 @@ class OrderNotifier extends StateNotifier<OrderState> {
   }
 
   void acceptOrder(String orderId, {List<Map<String, dynamic>>? items, double? itemTotal}) {
+    _audioPlayer.stop();
     _orderService.acceptOrder(orderId, items: items, itemTotal: itemTotal);
   }
 
+  void submitPrescriptionQuote(String orderId, List<Map<String, dynamic>> items, double itemTotal) {
+    _orderService.submitPrescriptionQuote(orderId, items, itemTotal);
+  }
+
   void rejectOrder(String orderId) {
+    _audioPlayer.stop();
     final newIncoming = state.incomingOrders
         .where((o) => o.id != orderId)
         .toList();
@@ -265,6 +298,7 @@ class OrderNotifier extends StateNotifier<OrderState> {
   void dispose() {
     _subscription?.cancel();
     _orderService.disconnect();
+    _audioPlayer.dispose();
     super.dispose();
   }
 }

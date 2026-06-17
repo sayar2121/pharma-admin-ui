@@ -95,6 +95,16 @@ class OrderService {
     _send(payload);
   }
 
+  void submitPrescriptionQuote(String orderId, List<Map<String, dynamic>> items, double itemTotal) {
+    final payload = <String, dynamic>{
+      "type": "submit_quote",
+      "order_id": orderId,
+      "items": items,
+      "item_total": itemTotal,
+    };
+    _send(payload);
+  }
+
   void updatePacking(
     String orderId, {
     required String riderName,
