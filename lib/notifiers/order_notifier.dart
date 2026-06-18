@@ -60,6 +60,7 @@ class OrderNotifier extends StateNotifier<OrderState> {
   OrderNotifier(this._orderService, this._shopId, this._user)
     : super(OrderState()) {
     _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    _audioPlayer.setSource(AssetSource('audio/order_ring.mp3')); // Pre-load the audio
     _subscription = _orderService.messageStream.listen(_onMessage);
   }
 
@@ -197,6 +198,10 @@ class OrderNotifier extends StateNotifier<OrderState> {
     _orderService.getBroadcastOrders();
   }
 
+  void stopRingtone() {
+    _audioPlayer.stop();
+  }
+
   void acceptOrder(String orderId, {List<Map<String, dynamic>>? items, double? itemTotal}) {
     _audioPlayer.stop();
     _orderService.acceptOrder(orderId, items: items, itemTotal: itemTotal);
@@ -207,11 +212,13 @@ class OrderNotifier extends StateNotifier<OrderState> {
   }
 
   void rejectOrder(String orderId) {
-    _audioPlayer.stop();
     final newIncoming = state.incomingOrders
         .where((o) => o.id != orderId)
         .toList();
     state = state.copyWith(incomingOrders: newIncoming);
+    if (newIncoming.isEmpty) {
+      _audioPlayer.stop();
+    }
   }
 
   Future<bool> requestRiderForOrder(Order order) async {

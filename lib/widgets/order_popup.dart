@@ -430,16 +430,58 @@ class OrderPopup extends StatelessWidget {
                             'Reject',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                              fontSize: 13,
                               fontFamily: 'Lexend',
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: ElevatedButton(
+                        flex: 2,
+                        child: OutlinedButton(
                           onPressed: () => onAccept(null, null),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Partially Accept',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              fontFamily: 'Lexend',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (order.type == 'prescription') {
+                              onAccept(null, null); // Prescription MUST open dialog to generate bill
+                            } else {
+                              // Standard order uses default items
+                              final items = order.items.map((item) => {
+                                'name': item.name,
+                                'quantity': item.quantity,
+                                'price': item.totalPrice / item.quantity,
+                                'total_price': item.totalPrice,
+                              }).toList();
+                              final itemTotal = order.items.fold(0.0, (sum, item) => sum + item.totalPrice);
+                              onAccept(items, itemTotal);
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.success,
                             foregroundColor: Colors.white,
@@ -453,7 +495,7 @@ class OrderPopup extends StatelessWidget {
                             'Accept',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                              fontSize: 13,
                               fontFamily: 'Lexend',
                             ),
                           ),

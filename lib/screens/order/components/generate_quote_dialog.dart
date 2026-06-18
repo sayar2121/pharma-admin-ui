@@ -205,8 +205,12 @@ class _GenerateQuoteDialogState extends ConsumerState<GenerateQuoteDialog> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _items.isEmpty ? null : () {
-                  widget.onSubmit(_items, _itemTotal);
-                  Navigator.pop(context);
+                  FocusScope.of(context).unfocus();
+                  Future.delayed(const Duration(milliseconds: 50), () {
+                    if (mounted) {
+                      widget.onSubmit(_items, _itemTotal);
+                    }
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

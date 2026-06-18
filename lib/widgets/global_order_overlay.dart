@@ -47,7 +47,8 @@ class _GlobalOrderOverlayState extends ConsumerState<GlobalOrderOverlay> {
         widget.child,
         if (shouldShowPopup)
           Positioned.fill(
-            child: TweenAnimationBuilder<double>(
+            child: FocusScope(
+              child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutCubic,
@@ -82,20 +83,32 @@ class _GlobalOrderOverlayState extends ConsumerState<GlobalOrderOverlay> {
                     return OrderPopup(
                       order: order,
                       onAccept: (items, itemTotal) {
-                        if (order.type == 'prescription') {
-                          setState(() {
-                            _billGenerationOrder = order;
-                          });
-                        } else {
-                          ref.read(orderProvider.notifier).acceptOrder(
-                            order.id,
-                            items: items,
-                            itemTotal: itemTotal,
-                          );
-                        }
+                        ref.read(orderProvider.notifier).stopRingtone();
+                        FocusScope.of(context).unfocus();
+                        Future.delayed(Duration.zero, () {
+                          if (!mounted) return;
+                          if (items != null && itemTotal != null) {
+                            // Instant accept with provided items (or default cart items)
+                            ref.read(orderProvider.notifier).acceptOrder(
+                              order.id,
+                              items: items,
+                              itemTotal: itemTotal,
+                            );
+                          } else {
+                            // Open bill generation dialog for partial accept or prescription
+                            setState(() {
+                              _billGenerationOrder = order;
+                            });
+                          }
+                        });
                       },
                       onReject: () {
-                        ref.read(orderProvider.notifier).rejectOrder(order.id);
+                        ref.read(orderProvider.notifier).stopRingtone();
+                        FocusScope.of(context).unfocus();
+                        Future.delayed(Duration.zero, () {
+                          if (!mounted) return;
+                          ref.read(orderProvider.notifier).rejectOrder(order.id);
+                        });
                       },
                       onPreviewImage: (url, isBase64) {
                         setState(() {
@@ -107,6 +120,7 @@ class _GlobalOrderOverlayState extends ConsumerState<GlobalOrderOverlay> {
                   },
                 ),
               ),
+            ),
             ),
           ),
           
@@ -159,6 +173,7 @@ class _GlobalOrderOverlayState extends ConsumerState<GlobalOrderOverlay> {
             child: Material(
               color: Colors.black54,
               child: BillGenerationDialog(
+                order: _billGenerationOrder,
                 onSubmit: (items, itemTotal) {
                   ref.read(orderProvider.notifier).acceptOrder(
                     _billGenerationOrder!.id,

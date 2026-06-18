@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../services/api_url.dart';
 import '../../routes/app_router.dart';
 import '../../screens/order/components/generate_quote_dialog.dart';
+import '../../widgets/bill_generation_dialog.dart';
 import 'assign_rider_bottomsheet.dart';
 
 class OrderBottomSheet extends ConsumerWidget {
@@ -342,7 +343,8 @@ class OrderBottomSheet extends ConsumerWidget {
           ),
 
           // Action Buttons
-          if (currentOrder.status == 'accepted' ||
+          if (currentOrder.status == 'broadcast' ||
+              currentOrder.status == 'accepted' ||
               currentOrder.status == 'awaiting_customer_approval' ||
               currentOrder.status == 'packing' ||
               currentOrder.status == 'out_for_delivery')
@@ -362,7 +364,59 @@ class OrderBottomSheet extends ConsumerWidget {
                 builder: (context) {
                   orderState.fetchingRidersFor.contains(currentOrder.id);
 
-                  if (currentOrder.status == 'awaiting_customer_approval') {
+                  if (currentOrder.status == 'broadcast') {
+                     return Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ref.read(orderProvider.notifier).rejectOrder(currentOrder.id);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.error,
+                              side: const BorderSide(color: AppColors.errorLight),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            child: const Text('Reject', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (dialogContext) => BillGenerationDialog(
+                                  order: currentOrder,
+                                  onSubmit: (items, itemTotal) {
+                                    ref.read(orderProvider.notifier).acceptOrder(
+                                      currentOrder.id,
+                                      items: items,
+                                      itemTotal: itemTotal,
+                                    );
+                                    Navigator.pop(dialogContext); // pop dialog
+                                    Navigator.pop(context); // pop bottomsheet
+                                  },
+                                  onCancel: () {
+                                    Navigator.pop(dialogContext); // pop dialog
+                                  },
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.success,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            child: const Text('Generate Quote', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else if (currentOrder.status == 'awaiting_customer_approval') {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -392,7 +446,7 @@ class OrderBottomSheet extends ConsumerWidget {
                           onPressed: () {
                              showDialog(
                                context: context,
-                               builder: (context) => GenerateQuoteDialog(
+                               builder: (dialogContext) => GenerateQuoteDialog(
                                  order: currentOrder,
                                  onSubmit: (items, itemTotal) {
                                    ref.read(orderProvider.notifier).submitPrescriptionQuote(
@@ -400,6 +454,8 @@ class OrderBottomSheet extends ConsumerWidget {
                                      items,
                                      itemTotal,
                                    );
+                                   Navigator.pop(dialogContext); // pop dialog
+                                   Navigator.pop(context); // pop bottomsheet
                                  },
                                ),
                              );
